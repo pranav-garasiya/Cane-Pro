@@ -110,7 +110,7 @@
             </button>
 
             <div class="mt-6 sm:mt-8 text-center pt-4 sm:pt-6 border-t border-slate-700/50">
-                <button onclick="window.toggleAuthMode()" id="auth-toggle-btn" class="text-teal-400 hover:text-teal-300 text-xs sm:text-sm font-bold transition-colors">Don't have an account? Sign Up</button>
+                <button onclick="window.toggleAuthMode()" id="auth-toggle-btn" type="button" class="text-teal-400 hover:text-teal-300 text-xs sm:text-sm font-bold transition-colors">Don't have an account? Sign Up</button>
             </div>
         </div>
     </div>
@@ -174,18 +174,18 @@
             </div>
         </div>
         
-        <div class="p-3 sm:p-4 border-t border-slate-800/50 shrink-0">
-            <div class="bg-slate-800/40 rounded-xl p-3 sm:p-4 border border-slate-700/50">
-                <a href="#" class="nav-link flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4 group border-transparent" data-target="profile-view">
-                    <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-slate-700 flex items-center justify-center text-slate-300 group-hover:bg-teal-500 group-hover:text-white transition-colors shrink-0">
-                        <i class="fas fa-user text-xs sm:text-sm"></i>
+        <div class="p-3 border-t border-slate-800/50 shrink-0">
+            <div class="bg-slate-800/40 rounded-xl p-3 border border-slate-700/50">
+                <a href="#" class="nav-link flex items-center gap-2 mb-3 group border-transparent" data-target="profile-view">
+                    <div class="w-8 h-8 rounded-lg bg-slate-700 flex items-center justify-center text-slate-300 group-hover:bg-teal-500 group-hover:text-white transition-colors shrink-0">
+                        <i class="fas fa-user text-xs"></i>
                     </div>
                     <div class="overflow-hidden flex-1">
-                        <p class="text-xs sm:text-sm font-bold text-white group-hover:text-teal-400 transition-colors">My Profile</p>
-                        <p class="text-[9px] sm:text-[10px] text-slate-400 truncate mt-0.5 font-mono" id="user-email-display">Not Logged In</p>
+                        <p class="text-xs font-bold text-white group-hover:text-teal-400 transition-colors">My Profile</p>
+                        <p class="text-[9px] text-slate-400 truncate font-mono" id="user-email-display">Not Logged In</p>
                     </div>
                 </a>
-                <button onclick="window.logout()" class="w-full flex items-center justify-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-slate-400 hover:bg-red-500/10 hover:text-red-400 hover:border-red-500/30 transition-all text-[10px] sm:text-xs font-black uppercase tracking-wider">
+                <button onclick="window.logout()" class="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-slate-400 hover:bg-red-500/10 hover:text-red-400 transition-all text-[10px] font-black uppercase tracking-wider">
                     <i class="fas fa-power-off"></i> Logout
                 </button>
             </div>
@@ -198,27 +198,27 @@
         <!-- Header -->
         <header class="h-16 sm:h-20 bg-slate-900/60 backdrop-blur-lg border-b border-slate-800/80 flex items-center justify-between px-3 sm:px-6 z-20 shrink-0 shadow-sm">
             <div class="flex items-center gap-3 sm:gap-4">
-                <button id="open-sidebar" class="lg:hidden text-slate-400 hover:text-white focus:outline-none p-1.5 sm:p-2 bg-slate-800 rounded-lg"><i class="fas fa-bars text-lg sm:text-xl"></i></button>
+                <button id="open-sidebar" class="lg:hidden text-slate-400 hover:text-white focus:outline-none p-1.5 bg-slate-800 rounded-lg"><i class="fas fa-bars text-lg"></i></button>
                 <div id="page-title-container" class="block">
-                    <h2 class="text-lg sm:text-2xl font-black text-white tracking-tight truncate max-w-[150px] sm:max-w-none" id="page-title">Dashboard</h2>
+                    <h2 class="text-lg sm:text-xl font-black text-white tracking-tight truncate max-w-[150px] sm:max-w-none" id="page-title">Dashboard</h2>
                 </div>
             </div>
             
-            <div class="flex items-center gap-2 sm:gap-6">
+            <div class="flex items-center gap-3">
                 <!-- Global Search -->
-                <div class="relative hidden lg:block w-64 xl:w-80">
-                    <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-500 text-xs sm:text-sm"></i>
-                    <input type="text" id="global-search" placeholder="Quick Search..." class="w-full pl-11 pr-4 py-2.5 bg-slate-800/80 border border-slate-700/50 rounded-xl text-xs sm:text-sm font-bold text-white placeholder-slate-500 focus:bg-slate-800 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 outline-none transition-all shadow-inner">
+                <div class="relative hidden sm:block w-48 lg:w-64">
+                    <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 text-xs"></i>
+                    <input type="text" id="global-search" placeholder="Quick Search..." class="w-full pl-9 pr-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-xs font-bold text-white placeholder-slate-500 focus:border-teal-500 outline-none transition-all">
                 </div>
 
                 <!-- Season Selector -->
-                <div class="flex items-center gap-1.5 sm:gap-2 bg-slate-800 border border-slate-700 pl-2 sm:pl-3 pr-1 sm:pr-2 py-1.5 sm:py-2 rounded-lg sm:rounded-xl shadow-md hover:border-teal-500/50 transition-colors">
-                    <div class="relative flex h-1.5 w-1.5 sm:h-2 sm:w-2">
+                <div class="flex items-center gap-2 bg-slate-800 border border-slate-700 pl-3 pr-2 py-1.5 rounded-lg shadow-sm hover:border-teal-500/50 transition-colors">
+                    <div class="relative flex h-1.5 w-1.5">
                         <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-75"></span>
-                        <span class="relative inline-flex rounded-full h-1.5 w-1.5 sm:h-2 sm:w-2 bg-teal-500"></span>
+                        <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-teal-500"></span>
                     </div>
                     <div class="select-wrapper">
-                        <select id="global-season-selector" class="bg-transparent text-[10px] sm:text-xs font-black text-teal-400 uppercase tracking-widest outline-none cursor-pointer appearance-none pr-4 sm:pr-6 max-w-[80px] sm:max-w-none">
+                        <select id="global-season-selector" class="bg-transparent text-[10px] sm:text-xs font-black text-teal-400 uppercase tracking-widest outline-none cursor-pointer appearance-none pr-5 max-w-[80px] sm:max-w-[120px]">
                             <option value="">Loading...</option>
                         </select>
                     </div>
@@ -228,12 +228,12 @@
 
         <!-- Loading Overlay -->
         <div id="loading-overlay" class="absolute inset-0 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center z-50">
-            <div class="flex flex-col items-center gap-3 sm:gap-4 bg-slate-800 p-6 sm:p-8 rounded-2xl sm:rounded-3xl border border-slate-700 shadow-xl">
-                <div class="relative w-10 h-10 sm:w-14 sm:h-14">
+            <div class="flex flex-col items-center gap-3 bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl">
+                <div class="relative w-10 h-10">
                     <div class="absolute inset-0 border-4 border-slate-700 rounded-full"></div>
                     <div class="absolute inset-0 border-4 border-teal-500 rounded-full border-t-transparent animate-spin"></div>
                 </div>
-                <p class="text-teal-400 font-black text-[10px] sm:text-xs uppercase tracking-widest">Syncing</p>
+                <p class="text-teal-400 font-black text-[10px] uppercase tracking-widest">Syncing</p>
             </div>
         </div>
 
@@ -241,31 +241,31 @@
         <div class="flex-1 overflow-y-auto p-3 sm:p-5 lg:p-6 scrollbar-hide relative z-10" id="main-container">
             
             <!-- Dashboard View -->
-            <div id="dashboard-view" class="view-section max-w-[90rem] mx-auto space-y-4 sm:space-y-6">
+            <div id="dashboard-view" class="view-section max-w-7xl mx-auto space-y-4 sm:space-y-6">
                 
                 <!-- Main Metrics Grid -->
                 <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-                    <!-- Big Total Weight Card -->
-                    <div class="col-span-2 bg-slate-800 border border-slate-700 rounded-2xl sm:rounded-3xl p-5 sm:p-6 relative overflow-hidden shadow-lg flex flex-col justify-center items-center hover-lift group border-b-4 border-b-teal-500">
-                        <div class="absolute -right-10 -bottom-10 w-32 h-32 sm:w-40 sm:h-40 bg-teal-500/10 blur-[40px] rounded-full pointer-events-none group-hover:bg-teal-500/20 transition-all duration-500"></div>
-                        <h2 class="text-5xl sm:text-[5rem] font-black text-white tracking-tighter flex items-end z-10">
+                    <!-- Big Total Weight Card (Takes 2 cols) -->
+                    <div class="col-span-2 bg-slate-800 border border-slate-700 rounded-2xl p-5 sm:p-6 relative overflow-hidden shadow-lg flex flex-col justify-center items-center hover-lift group border-b-4 border-b-teal-500">
+                        <div class="absolute -right-10 -bottom-10 w-32 h-32 bg-teal-500/10 blur-[40px] rounded-full pointer-events-none group-hover:bg-teal-500/20 transition-all duration-500"></div>
+                        <h2 class="text-5xl sm:text-6xl font-black text-white tracking-tighter flex items-end">
                             <span id="stat-weight-main">0</span>
-                            <span class="text-xl sm:text-3xl text-teal-500 font-bold ml-1.5 sm:ml-2 mb-1 sm:mb-2">T</span>
+                            <span class="text-xl sm:text-2xl text-teal-500 font-bold ml-1.5 mb-1 sm:mb-2">T</span>
                         </h2>
                         <p class="text-slate-400 text-[10px] sm:text-xs font-black tracking-widest uppercase mt-2 sm:mt-3 bg-slate-900/60 px-3 sm:px-4 py-1.5 rounded-full border border-slate-700/50 shadow-inner z-10">Total Net Weight</p>
                     </div>
 
                     <!-- Mini Stats -->
-                    <div class="bg-slate-800 border border-slate-700 rounded-2xl sm:rounded-3xl p-4 sm:p-6 flex flex-col justify-center items-center text-center shadow-lg border-b-4 border-b-amber-500 hover-lift relative overflow-hidden">
-                        <div class="absolute top-2 right-2 opacity-5"><i class="fas fa-truck-loading text-4xl sm:text-6xl text-amber-500"></i></div>
-                        <h3 class="text-3xl sm:text-5xl font-black text-amber-400 relative z-10" id="stat-today-trips">0</h3>
-                        <p class="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1 sm:mt-2 relative z-10">Today's Trips</p>
+                    <div class="bg-slate-800 border border-slate-700 rounded-2xl p-4 flex flex-col justify-center items-center text-center shadow-lg border-b-4 border-b-amber-500 hover-lift relative overflow-hidden">
+                        <div class="absolute top-2 right-2 opacity-5"><i class="fas fa-truck-loading text-4xl text-amber-500"></i></div>
+                        <h3 class="text-3xl sm:text-4xl font-black text-amber-400 relative z-10" id="stat-today-trips">0</h3>
+                        <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-1 relative z-10">Today's Trips</p>
                     </div>
 
-                    <div class="bg-slate-800 border border-slate-700 rounded-2xl sm:rounded-3xl p-4 sm:p-6 flex flex-col justify-center items-center text-center shadow-lg border-b-4 border-b-blue-500 hover-lift relative overflow-hidden">
-                        <div class="absolute top-2 right-2 opacity-5"><i class="fas fa-layer-group text-4xl sm:text-6xl text-blue-500"></i></div>
-                        <h3 class="text-3xl sm:text-5xl font-black text-blue-400 relative z-10" id="stat-total-trips">0</h3>
-                        <p class="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1 sm:mt-2 relative z-10">Total Trips</p>
+                    <div class="bg-slate-800 border border-slate-700 rounded-2xl p-4 flex flex-col justify-center items-center text-center shadow-lg border-b-4 border-b-blue-500 hover-lift relative overflow-hidden">
+                        <div class="absolute top-2 right-2 opacity-5"><i class="fas fa-layer-group text-4xl text-blue-500"></i></div>
+                        <h3 class="text-3xl sm:text-4xl font-black text-blue-400 relative z-10" id="stat-total-trips">0</h3>
+                        <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-1 relative z-10">Total Trips</p>
                     </div>
                 </div>
 
@@ -280,7 +280,7 @@
                     </button>
                 </div>
 
-                <!-- Recent Trips Card Layout -->
+                <!-- Dashboard Recent Trips List (Card Layout matching screenshot) -->
                 <div class="flex flex-col gap-4 mt-2 sm:mt-4">
                     <div class="flex justify-between items-center px-1">
                         <div>
@@ -299,7 +299,7 @@
 
             <!-- Reusable List Header Template (WITH UNIFIED COMPACT REPORT FILTERS) -->
             <template id="list-header-template">
-                <div class="bg-slate-800 border border-slate-700 rounded-2xl sm:rounded-3xl p-4 sm:p-5 mb-4 flex flex-col gap-4 shadow-sm border-l-4 border-l-teal-500 relative overflow-hidden">
+                <div class="bg-slate-800 border border-slate-700 rounded-2xl p-4 sm:p-5 mb-4 flex flex-col gap-4 shadow-sm border-l-4 border-l-teal-500 relative overflow-hidden">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 relative z-10">
                         <div>
                             <h3 class="text-lg sm:text-2xl font-black text-white list-title tracking-tight">Title</h3>
@@ -324,11 +324,11 @@
                             <button onclick="window.setDateFilter('monthly', this)" class="dir-filter-btn px-3 py-1.5 rounded-lg text-[10px] font-bold text-slate-400 bg-slate-900 border border-slate-700 hover:text-white transition-all shrink-0">Monthly</button>
                             <button onclick="window.setDateFilter('yearly', this)" class="dir-filter-btn px-3 py-1.5 rounded-lg text-[10px] font-bold text-slate-400 bg-slate-900 border border-slate-700 hover:text-white transition-all shrink-0">Yearly</button>
                         </div>
-                        <div class="flex items-center gap-1.5 w-full xl:w-auto bg-slate-900/50 p-1.5 rounded-lg border border-slate-700 shrink-0 flex-nowrap overflow-x-auto scrollbar-hide">
-                            <input type="date" class="custom-start premium-input px-2 py-1 rounded-md text-[10px] font-bold shrink-0">
+                        <div class="flex items-center gap-1.5 w-full xl:w-auto bg-slate-900/50 p-1 rounded-lg border border-slate-700 shrink-0 flex-nowrap overflow-x-auto scrollbar-hide">
+                            <input type="date" class="custom-start premium-input px-2 py-1.5 rounded-md text-[10px] font-bold shrink-0">
                             <span class="text-slate-500 text-[9px] font-black px-1 shrink-0">TO</span>
-                            <input type="date" class="custom-end premium-input px-2 py-1 rounded-md text-[10px] font-bold shrink-0">
-                            <button onclick="window.setDateFilter('custom', this)" class="bg-teal-600 hover:bg-teal-500 text-white px-3 py-1 rounded-md text-[10px] font-bold shadow-md transition-all shrink-0">Apply</button>
+                            <input type="date" class="custom-end premium-input px-2 py-1.5 rounded-md text-[10px] font-bold shrink-0">
+                            <button onclick="window.setDateFilter('custom', this)" class="bg-teal-600 hover:bg-teal-500 text-white px-3 py-1.5 rounded-md text-[10px] font-bold shadow-md transition-all shrink-0">Apply</button>
                         </div>
                     </div>
                 </div>
@@ -554,7 +554,7 @@
 
     <!-- Generic Modal for Forms -->
     <div id="data-modal" class="fixed inset-0 bg-slate-900/90 backdrop-blur-md hidden items-center justify-center z-[150] p-3 opacity-0 transition-opacity duration-300">
-        <div class="bg-slate-800 border border-slate-700 rounded-2xl sm:rounded-3xl w-full max-w-2xl flex flex-col max-h-[90vh] shadow-2xl transform scale-95 transition-transform duration-300 overflow-hidden" id="modal-content">
+        <div class="bg-slate-800 border border-slate-700 rounded-2xl w-full max-w-2xl flex flex-col max-h-[90vh] shadow-2xl transform scale-95 transition-transform duration-300 overflow-hidden" id="modal-content">
             <div class="h-1 w-full bg-gradient-to-r from-teal-500 to-blue-500"></div>
             <div class="px-5 py-4 border-b border-slate-700/50 flex justify-between items-center bg-slate-900/50 shrink-0">
                 <div>
@@ -704,7 +704,7 @@
             }
         });
 
-        // Filter Logic Unified
+        window.setDateFilter = (type, btn) => {
             window.appState.directoryDateFilter = type;
             
             const wrapper = btn.closest('.dir-filter-wrapper');
@@ -845,6 +845,8 @@
             await signOut(auth);
             showToast("Logged out successfully");
             document.querySelectorAll('tbody').forEach(tb => tb.innerHTML = '');
+            const dst2 = document.getElementById('dashboard-recent-trips');
+            if (dst2) dst2.innerHTML = '';
         };
 
         const formConfigs = {
@@ -1497,7 +1499,7 @@
                     <tr>
                         <td class="px-4 py-3">
                             <div class="flex items-center gap-2 sm:gap-3">
-                                <i class="fas fa-user-tie text-slate-500 text-sm sm:text-base"></i>
+                                <i class="fas fa-user-tie text-slate-500 text-lg sm:text-xl"></i>
                                 <div>
                                     <span class="font-bold text-white block text-[11px] sm:text-xs">${item.name||'Unknown'}</span>
                                     <span class="text-[9px] text-slate-400 truncate max-w-[100px] sm:max-w-[150px] block">${item.address||'-'}</span>
@@ -1601,7 +1603,11 @@
                 const factory = (window.appState.factories||[]).find(f => f.id === item.factoryId)?.name || 'Unknown';
                 const farmerObj = (window.appState.farmers||[]).find(f => f.id === item.farmerId);
                 const farmer = farmerObj?.name || 'Unknown';
-                
+                const farmerLoc = farmerObj?.location || '-';
+                const tractorObj = (window.appState.tractors||[]).find(t => t.id === item.tractorId);
+                const tractorNo = tractorObj ? tractorObj.number : 'Unknown';
+                const tractorOwner = tractorObj ? tractorObj.owner : '-';
+
                 let timeLabel = '';
                 if (item.time) {
                     const hour = parseInt(item.time.split(':')[0]);
