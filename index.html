@@ -1,0 +1,1741 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Cane Pro - Advanced Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- jsPDF for Premium PDF Exports -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    
+    <style>
+        /* Modern Clean Font */
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0f172a; color: #f8fafc; overflow: hidden; }
+        
+        /* Compact Scrollbar for tables */
+        ::-webkit-scrollbar { height: 6px; width: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(30, 41, 59, 0.3); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+        
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        .hidden { display: none !important; }
+        
+        /* Subtle Background Blobs */
+        .bg-blobs { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; overflow: hidden; pointer-events: none; }
+        .blob { position: absolute; border-radius: 50%; filter: blur(120px); opacity: 0.15; }
+        .blob-1 { width: 400px; height: 400px; background: #14b8a6; top: -10%; left: -10%; }
+        .blob-2 { width: 500px; height: 500px; background: #3b82f6; bottom: -20%; right: -10%; }
+
+        /* Premium Form Inputs */
+        .premium-input { background-color: #1e293b; border: 1px solid #334155; color: #f1f5f9; transition: all 0.2s ease; }
+        .premium-input:focus { background-color: #0f172a; border-color: #14b8a6; outline: none; box-shadow: 0 0 0 2px rgba(20, 184, 166, 0.2); }
+        .premium-input[readonly] { background-color: #0f172a; color: #64748b; border-color: #1e293b; cursor: not-allowed; }
+        select.premium-input option { background-color: #1e293b; color: #f1f5f9; }
+
+        /* Custom Dropdown Arrow */
+        .select-wrapper { position: relative; }
+        .select-wrapper::after { content: '\f078'; font-family: 'Font Awesome 5 Free'; font-weight: 900; position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); color: #64748b; pointer-events: none; font-size: 0.7rem; }
+
+        /* Smooth Hover Effects */
+        .hover-lift { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+        .hover-lift:hover { transform: translateY(-2px); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3); }
+
+        /* Mobile Optimized Tables - NO OVERLAP */
+        .table-container { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); border: 1px solid #334155; border-radius: 1rem; overflow: hidden; background-color: #1e293b; width: 100%; }
+        table { border-collapse: collapse; width: 100%; min-width: max-content; }
+        thead { background-color: #0f172a; }
+        th { color: #94a3b8; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 800; padding: 0.75rem 1rem; text-align: left; white-space: nowrap; border-bottom: 1px solid #334155; }
+        td { padding: 0.85rem 1rem; color: #cbd5e1; font-size: 0.8rem; border-bottom: 1px solid #334155; white-space: nowrap; font-weight: 600; }
+        tbody tr { transition: background-color 0.2s ease; }
+        tbody tr:hover { background-color: #334155; }
+        tbody tr:last-child td { border-bottom: none; }
+        
+        @media (min-width: 640px) {
+            th { font-size: 0.75rem; padding: 1rem 1.5rem; }
+            td { font-size: 0.875rem; padding: 1rem 1.5rem; }
+            .table-container { border-radius: 1.5rem; }
+        }
+        
+        .dir-filter-btn.active-filter { background-color: #0d9488; color: #ffffff; border-color: #0d9488; box-shadow: 0 4px 10px rgba(13, 148, 136, 0.3); }
+        .trip-tab.active-tab { background-color: #14b8a6; color: #ffffff; }
+    </style>
+</head>
+<body class="flex h-screen selection:bg-teal-500/30 selection:text-teal-200 text-slate-300 text-sm overflow-hidden">
+
+    <div class="bg-blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+    </div>
+
+    <!-- Login / Auth Overlay -->
+    <div id="auth-overlay" class="fixed inset-0 bg-slate-900 z-[100] flex items-center justify-center transition-opacity duration-500 p-4">
+        <div class="bg-slate-800 border border-slate-700 rounded-3xl shadow-2xl w-full max-w-md p-6 sm:p-10 relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-teal-400 to-blue-500"></div>
+            
+            <div class="text-center mb-6 sm:mb-8">
+                <div class="w-14 h-14 sm:w-16 sm:h-16 bg-slate-900 border border-slate-700 rounded-2xl flex items-center justify-center text-2xl sm:text-3xl text-teal-400 mx-auto mb-4 shadow-inner">
+                    <i class="fas fa-leaf"></i>
+                </div>
+                <h2 class="text-2xl sm:text-3xl font-black text-white tracking-tight">Cane <span class="text-teal-400">Pro</span></h2>
+                <p class="text-slate-400 text-xs sm:text-sm mt-1.5 font-medium" id="auth-subtitle">Login to manage operations</p>
+            </div>
+            
+            <form id="auth-form" onsubmit="window.handleAuthSubmit(event)" class="space-y-4 sm:space-y-5">
+                <input type="hidden" id="auth-mode" value="login">
+                <div>
+                    <label class="block text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-widest mb-1.5">Email Address</label>
+                    <input type="email" id="auth-email" required placeholder="name@example.com" class="w-full premium-input rounded-lg sm:rounded-xl px-3 sm:px-4 py-3 sm:py-3.5 text-xs sm:text-sm font-medium placeholder-slate-600">
+                </div>
+                <div>
+                    <label class="block text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-widest mb-1.5">Password</label>
+                    <input type="password" id="auth-password" required placeholder="••••••••" class="w-full premium-input rounded-lg sm:rounded-xl px-3 sm:px-4 py-3 sm:py-3.5 text-xs sm:text-sm font-medium placeholder-slate-600">
+                </div>
+                <button type="submit" class="w-full py-3 sm:py-3.5 bg-teal-600 hover:bg-teal-500 text-white rounded-lg sm:rounded-xl font-bold shadow-lg hover:shadow-teal-500/25 transition-all text-xs sm:text-sm tracking-wide mt-2" id="auth-submit-btn">SIGN IN</button>
+            </form>
+            
+            <div class="mt-5 sm:mt-6 flex items-center justify-center space-x-3 sm:space-x-4">
+                <span class="h-px w-full bg-slate-700"></span>
+                <span class="text-[9px] sm:text-[10px] text-slate-500 font-bold uppercase tracking-widest whitespace-nowrap">OR</span>
+                <span class="h-px w-full bg-slate-700"></span>
+            </div>
+            
+            <button type="button" onclick="window.loginWithGoogle()" class="w-full mt-4 sm:mt-6 py-3 sm:py-3.5 bg-slate-900 border border-slate-700 hover:border-slate-500 text-white rounded-lg sm:rounded-xl font-bold transition-all text-xs sm:text-sm flex items-center justify-center gap-2 sm:gap-3">
+                <i class="fab fa-google text-red-500"></i> Continue with Google
+            </button>
+
+            <div class="mt-6 sm:mt-8 text-center pt-4 sm:pt-6 border-t border-slate-700/50">
+                <button onclick="window.toggleAuthMode()" id="auth-toggle-btn" class="text-teal-400 hover:text-teal-300 text-xs sm:text-sm font-bold transition-colors">Don't have an account? Sign Up</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Sidebar Overlay -->
+    <div id="sidebar-overlay" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-40 hidden lg:hidden transition-opacity opacity-0"></div>
+
+    <!-- Sidebar -->
+    <aside id="sidebar-container" class="fixed lg:static inset-y-0 left-0 z-50 w-64 sm:w-72 bg-slate-900/95 backdrop-blur-xl border-r border-slate-800 flex flex-col transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out h-full shadow-[10px_0_30px_rgba(0,0,0,0.5)]">
+        <div class="h-16 sm:h-20 flex items-center justify-between px-4 sm:px-6 border-b border-slate-800/50 shrink-0">
+            <button onclick="document.querySelector('[data-target=\'dashboard-view\']').click()" class="flex items-center gap-2 sm:gap-3 focus:outline-none">
+                <div class="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-teal-500 to-emerald-600 rounded-lg sm:rounded-xl flex items-center justify-center text-white shadow-md">
+                    <i class="fas fa-seedling text-sm sm:text-lg"></i>
+                </div>
+                <span class="text-xl sm:text-2xl font-black text-white tracking-tight">Cane <span class="text-teal-400">Pro</span></span>
+            </button>
+            <button id="close-sidebar" class="lg:hidden text-slate-400 hover:text-white focus:outline-none p-2"><i class="fas fa-times text-lg"></i></button>
+        </div>
+        
+        <div class="flex-1 overflow-y-auto py-4 sm:py-6 px-3 sm:px-4 space-y-6 sm:space-y-8 scrollbar-hide">
+            <div>
+                <p class="px-3 sm:px-4 text-[9px] sm:text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 sm:mb-3">Overview</p>
+                <ul class="space-y-1">
+                    <li><a href="#" class="nav-link flex items-center gap-3 px-3 sm:px-4 py-2.5 sm:py-3.5 rounded-lg sm:rounded-xl bg-teal-500/10 text-teal-400 font-bold transition-colors border border-teal-500/20 shadow-inner text-xs sm:text-sm" data-target="dashboard-view">
+                        <i class="fas fa-border-all w-5 text-center text-base sm:text-lg"></i> Dashboard
+                    </a></li>
+                    <li><a href="#" class="nav-link flex items-center gap-3 px-3 sm:px-4 py-2.5 sm:py-3.5 rounded-lg sm:rounded-xl text-slate-400 hover:bg-slate-800 hover:text-white font-semibold transition-colors border border-transparent text-xs sm:text-sm" data-target="trip-view">
+                        <i class="fas fa-route w-5 text-center text-base sm:text-lg"></i> Trip Logs
+                    </a></li>
+                    <li><a href="#" class="nav-link flex items-center gap-3 px-3 sm:px-4 py-2.5 sm:py-3.5 rounded-lg sm:rounded-xl text-slate-400 hover:bg-slate-800 hover:text-white font-semibold transition-colors border border-transparent text-xs sm:text-sm" data-target="factory-view">
+                        <i class="fas fa-industry w-5 text-center text-base sm:text-lg"></i> Factories
+                    </a></li>
+                </ul>
+            </div>
+
+            <div>
+                <p class="px-3 sm:px-4 text-[9px] sm:text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 sm:mb-3">Directory</p>
+                <ul class="space-y-1">
+                    <li><a href="#" class="nav-link flex items-center gap-3 px-3 sm:px-4 py-2.5 sm:py-3.5 rounded-lg sm:rounded-xl text-slate-400 hover:bg-slate-800 hover:text-white font-semibold transition-colors border border-transparent text-xs sm:text-sm" data-target="farmer-view">
+                        <i class="fas fa-users w-5 text-center text-base sm:text-lg"></i> Farmers
+                    </a></li>
+                    <li><a href="#" class="nav-link flex items-center gap-3 px-3 sm:px-4 py-2.5 sm:py-3.5 rounded-lg sm:rounded-xl text-slate-400 hover:bg-slate-800 hover:text-white font-semibold transition-colors border border-transparent text-xs sm:text-sm" data-target="tractor-view">
+                        <i class="fas fa-tractor w-5 text-center text-base sm:text-lg"></i> Tractors
+                    </a></li>
+                    <li><a href="#" class="nav-link flex items-center gap-3 px-3 sm:px-4 py-2.5 sm:py-3.5 rounded-lg sm:rounded-xl text-slate-400 hover:bg-slate-800 hover:text-white font-semibold transition-colors border border-transparent text-xs sm:text-sm" data-target="driver-view">
+                        <i class="fas fa-id-card w-5 text-center text-base sm:text-lg"></i> Drivers
+                    </a></li>
+                    <li><a href="#" class="nav-link flex items-center gap-3 px-3 sm:px-4 py-2.5 sm:py-3.5 rounded-lg sm:rounded-xl text-slate-400 hover:bg-slate-800 hover:text-white font-semibold transition-colors border border-transparent text-xs sm:text-sm" data-target="mukadam-view">
+                        <i class="fas fa-user-tie w-5 text-center text-base sm:text-lg"></i> Mukadams
+                    </a></li>
+                </ul>
+            </div>
+
+            <div>
+                <p class="px-3 sm:px-4 text-[9px] sm:text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 sm:mb-3">System</p>
+                <ul class="space-y-1">
+                    <li><a href="#" class="nav-link flex items-center gap-3 px-3 sm:px-4 py-2.5 sm:py-3.5 rounded-lg sm:rounded-xl text-slate-400 hover:bg-slate-800 hover:text-white font-semibold transition-colors border border-transparent text-xs sm:text-sm" data-target="season-view">
+                        <i class="fas fa-calendar-alt w-5 text-center text-base sm:text-lg"></i> Seasons
+                    </a></li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="p-3 sm:p-4 border-t border-slate-800/50 shrink-0">
+            <div class="bg-slate-800/40 rounded-xl p-3 sm:p-4 border border-slate-700/50">
+                <a href="#" class="nav-link flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4 group border-transparent" data-target="profile-view">
+                    <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-slate-700 flex items-center justify-center text-slate-300 group-hover:bg-teal-500 group-hover:text-white transition-colors shrink-0">
+                        <i class="fas fa-user text-xs sm:text-sm"></i>
+                    </div>
+                    <div class="overflow-hidden flex-1">
+                        <p class="text-xs sm:text-sm font-bold text-white group-hover:text-teal-400 transition-colors">My Profile</p>
+                        <p class="text-[9px] sm:text-[10px] text-slate-400 truncate mt-0.5 font-mono" id="user-email-display">Not Logged In</p>
+                    </div>
+                </a>
+                <button onclick="window.logout()" class="w-full flex items-center justify-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-slate-400 hover:bg-red-500/10 hover:text-red-400 hover:border-red-500/30 transition-all text-[10px] sm:text-xs font-black uppercase tracking-wider">
+                    <i class="fas fa-power-off"></i> Logout
+                </button>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 flex flex-col h-screen overflow-hidden relative">
+        
+        <!-- Header -->
+        <header class="h-16 sm:h-20 bg-slate-900/60 backdrop-blur-lg border-b border-slate-800/80 flex items-center justify-between px-3 sm:px-6 z-20 shrink-0 shadow-sm">
+            <div class="flex items-center gap-3 sm:gap-4">
+                <button id="open-sidebar" class="lg:hidden text-slate-400 hover:text-white focus:outline-none p-1.5 sm:p-2 bg-slate-800 rounded-lg"><i class="fas fa-bars text-lg sm:text-xl"></i></button>
+                <div id="page-title-container" class="block">
+                    <h2 class="text-lg sm:text-2xl font-black text-white tracking-tight truncate max-w-[150px] sm:max-w-none" id="page-title">Dashboard</h2>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-2 sm:gap-6">
+                <!-- Global Search -->
+                <div class="relative hidden lg:block w-64 xl:w-80">
+                    <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-500 text-xs sm:text-sm"></i>
+                    <input type="text" id="global-search" placeholder="Quick Search..." class="w-full pl-11 pr-4 py-2.5 bg-slate-800/80 border border-slate-700/50 rounded-xl text-xs sm:text-sm font-bold text-white placeholder-slate-500 focus:bg-slate-800 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 outline-none transition-all shadow-inner">
+                </div>
+
+                <!-- Season Selector -->
+                <div class="flex items-center gap-1.5 sm:gap-2 bg-slate-800 border border-slate-700 pl-2 sm:pl-3 pr-1 sm:pr-2 py-1.5 sm:py-2 rounded-lg sm:rounded-xl shadow-md hover:border-teal-500/50 transition-colors">
+                    <div class="relative flex h-1.5 w-1.5 sm:h-2 sm:w-2">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-1.5 w-1.5 sm:h-2 sm:w-2 bg-teal-500"></span>
+                    </div>
+                    <div class="select-wrapper">
+                        <select id="global-season-selector" class="bg-transparent text-[10px] sm:text-xs font-black text-teal-400 uppercase tracking-widest outline-none cursor-pointer appearance-none pr-4 sm:pr-6 max-w-[80px] sm:max-w-none">
+                            <option value="">Loading...</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Loading Overlay -->
+        <div id="loading-overlay" class="absolute inset-0 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center z-50">
+            <div class="flex flex-col items-center gap-3 sm:gap-4 bg-slate-800 p-6 sm:p-8 rounded-2xl sm:rounded-3xl border border-slate-700 shadow-xl">
+                <div class="relative w-10 h-10 sm:w-14 sm:h-14">
+                    <div class="absolute inset-0 border-4 border-slate-700 rounded-full"></div>
+                    <div class="absolute inset-0 border-4 border-teal-500 rounded-full border-t-transparent animate-spin"></div>
+                </div>
+                <p class="text-teal-400 font-black text-[10px] sm:text-xs uppercase tracking-widest">Syncing</p>
+            </div>
+        </div>
+
+        <!-- Main Scrollable Area -->
+        <div class="flex-1 overflow-y-auto p-3 sm:p-5 lg:p-6 scrollbar-hide relative z-10" id="main-container">
+            
+            <!-- Dashboard View -->
+            <div id="dashboard-view" class="view-section max-w-[90rem] mx-auto space-y-4 sm:space-y-6">
+                
+                <!-- Main Metrics Grid -->
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+                    <!-- Big Total Weight Card -->
+                    <div class="col-span-2 bg-slate-800 border border-slate-700 rounded-2xl sm:rounded-3xl p-5 sm:p-6 relative overflow-hidden shadow-lg flex flex-col justify-center items-center hover-lift group border-b-4 border-b-teal-500">
+                        <div class="absolute -right-10 -bottom-10 w-32 h-32 sm:w-40 sm:h-40 bg-teal-500/10 blur-[40px] rounded-full pointer-events-none group-hover:bg-teal-500/20 transition-all duration-500"></div>
+                        <h2 class="text-5xl sm:text-[5rem] font-black text-white tracking-tighter flex items-end z-10">
+                            <span id="stat-weight-main">0</span>
+                            <span class="text-xl sm:text-3xl text-teal-500 font-bold ml-1.5 sm:ml-2 mb-1 sm:mb-2">T</span>
+                        </h2>
+                        <p class="text-slate-400 text-[10px] sm:text-xs font-black tracking-widest uppercase mt-2 sm:mt-3 bg-slate-900/60 px-3 sm:px-4 py-1.5 rounded-full border border-slate-700/50 shadow-inner z-10">Total Net Weight</p>
+                    </div>
+
+                    <!-- Mini Stats -->
+                    <div class="bg-slate-800 border border-slate-700 rounded-2xl sm:rounded-3xl p-4 sm:p-6 flex flex-col justify-center items-center text-center shadow-lg border-b-4 border-b-amber-500 hover-lift relative overflow-hidden">
+                        <div class="absolute top-2 right-2 opacity-5"><i class="fas fa-truck-loading text-4xl sm:text-6xl text-amber-500"></i></div>
+                        <h3 class="text-3xl sm:text-5xl font-black text-amber-400 relative z-10" id="stat-today-trips">0</h3>
+                        <p class="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1 sm:mt-2 relative z-10">Today's Trips</p>
+                    </div>
+
+                    <div class="bg-slate-800 border border-slate-700 rounded-2xl sm:rounded-3xl p-4 sm:p-6 flex flex-col justify-center items-center text-center shadow-lg border-b-4 border-b-blue-500 hover-lift relative overflow-hidden">
+                        <div class="absolute top-2 right-2 opacity-5"><i class="fas fa-layer-group text-4xl sm:text-6xl text-blue-500"></i></div>
+                        <h3 class="text-3xl sm:text-5xl font-black text-blue-400 relative z-10" id="stat-total-trips">0</h3>
+                        <p class="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1 sm:mt-2 relative z-10">Total Trips</p>
+                    </div>
+                </div>
+
+                <!-- Actions Bar -->
+                <div class="flex flex-col sm:flex-row justify-between items-center gap-3">
+                    <div class="relative w-full sm:max-w-md block">
+                        <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-500 text-xs"></i>
+                        <input type="text" id="dash-trip-search" placeholder="Search recent trips..." class="w-full pl-10 pr-4 py-2.5 sm:py-3.5 bg-slate-800 border border-slate-700 rounded-xl text-xs sm:text-sm font-bold text-white placeholder-slate-500 focus:border-teal-500 outline-none transition-all shadow-sm">
+                    </div>
+                    <button onclick="window.openModal('trip')" class="w-full sm:w-auto bg-teal-600 hover:bg-teal-500 text-white px-5 sm:px-6 py-2.5 sm:py-3.5 rounded-xl transition-all font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-teal-500/20 hover:-translate-y-0.5">
+                        <i class="fas fa-plus"></i> Create New Trip
+                    </button>
+                </div>
+
+                <!-- Recent Trips Card Layout -->
+                <div class="flex flex-col gap-4 mt-2 sm:mt-4">
+                    <div class="flex justify-between items-center px-1">
+                        <div>
+                            <h3 class="text-base sm:text-lg font-black text-white tracking-wide">Recent Trips</h3>
+                            <p class="text-[10px] sm:text-xs text-slate-400 mt-0.5">An overview of the latest sugarcane transport trips.</p>
+                        </div>
+                        <button onclick="document.querySelector('[data-target=\'trip-view\']').click()" class="text-[10px] sm:text-xs font-bold text-teal-400 hover:text-teal-300 items-center gap-1 bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700 transition-colors">View All <i class="fas fa-arrow-right ml-1"></i></button>
+                    </div>
+                    
+                    <div id="dashboard-recent-trips" class="flex flex-col gap-3 sm:gap-4 pb-4">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Reusable List Header Template (WITH UNIFIED COMPACT REPORT FILTERS) -->
+            <template id="list-header-template">
+                <div class="bg-slate-800 border border-slate-700 rounded-2xl sm:rounded-3xl p-4 sm:p-5 mb-4 flex flex-col gap-4 shadow-sm border-l-4 border-l-teal-500 relative overflow-hidden">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 relative z-10">
+                        <div>
+                            <h3 class="text-lg sm:text-2xl font-black text-white list-title tracking-tight">Title</h3>
+                            <p class="text-[9px] sm:text-[10px] font-bold text-slate-400 mt-0.5 uppercase tracking-widest">Manage directory records.</p>
+                        </div>
+                        <div class="flex gap-2 w-full sm:w-auto">
+                            <button class="export-pdf-btn flex-1 sm:flex-none justify-center bg-slate-900 border border-slate-700 hover:border-red-500/50 text-slate-300 hover:text-red-400 px-3 py-2 rounded-lg transition-all flex items-center gap-1.5 font-bold text-[10px] shadow-sm">
+                                <i class="fas fa-file-pdf text-red-500"></i> Export PDF
+                            </button>
+                            <button class="add-new-btn flex-1 sm:flex-none justify-center bg-teal-600 hover:bg-teal-500 text-white px-3 py-2 rounded-lg transition-all flex items-center gap-1.5 font-bold text-[10px] shadow-md">
+                                <i class="fas fa-plus"></i> Add Record
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Unified Report Date Filter (Compact & Horizontally Scrollable) -->
+                    <div class="pt-3 border-t border-slate-700/50 flex flex-col xl:flex-row justify-between items-start xl:items-center gap-3 relative z-10 w-full dir-filter-wrapper">
+                        <div class="flex items-center gap-1.5 w-full xl:w-auto overflow-x-auto scrollbar-hide pb-1 flex-nowrap">
+                            <span class="text-[9px] font-black text-slate-500 uppercase mr-1 tracking-widest shrink-0 hidden sm:inline-block"><i class="fas fa-filter mr-1 text-slate-400"></i> Filter:</span>
+                            <button onclick="window.setDateFilter('all', this)" class="dir-filter-btn active-filter px-3 py-1.5 rounded-lg text-[10px] font-bold text-slate-400 bg-slate-900 border border-slate-700 hover:text-white transition-all shrink-0">All Time</button>
+                            <button onclick="window.setDateFilter('weekly', this)" class="dir-filter-btn px-3 py-1.5 rounded-lg text-[10px] font-bold text-slate-400 bg-slate-900 border border-slate-700 hover:text-white transition-all shrink-0">Weekly</button>
+                            <button onclick="window.setDateFilter('monthly', this)" class="dir-filter-btn px-3 py-1.5 rounded-lg text-[10px] font-bold text-slate-400 bg-slate-900 border border-slate-700 hover:text-white transition-all shrink-0">Monthly</button>
+                            <button onclick="window.setDateFilter('yearly', this)" class="dir-filter-btn px-3 py-1.5 rounded-lg text-[10px] font-bold text-slate-400 bg-slate-900 border border-slate-700 hover:text-white transition-all shrink-0">Yearly</button>
+                        </div>
+                        <div class="flex items-center gap-1.5 w-full xl:w-auto bg-slate-900/50 p-1.5 rounded-lg border border-slate-700 shrink-0 flex-nowrap overflow-x-auto scrollbar-hide">
+                            <input type="date" class="custom-start premium-input px-2 py-1 rounded-md text-[10px] font-bold shrink-0">
+                            <span class="text-slate-500 text-[9px] font-black px-1 shrink-0">TO</span>
+                            <input type="date" class="custom-end premium-input px-2 py-1 rounded-md text-[10px] font-bold shrink-0">
+                            <button onclick="window.setDateFilter('custom', this)" class="bg-teal-600 hover:bg-teal-500 text-white px-3 py-1 rounded-md text-[10px] font-bold shadow-md transition-all shrink-0">Apply</button>
+                        </div>
+                    </div>
+                </div>
+            </template>
+
+            <!-- TRIPS VIEW -->
+            <div id="trip-view" class="view-section hidden max-w-7xl mx-auto">
+                <div id="trip-header-container"></div>
+                <div class="flex gap-3 w-full mb-4">
+                    <div class="bg-slate-800 border border-slate-700 rounded-xl px-4 py-2 flex flex-col justify-center items-center shadow-sm w-1/2 border-b-2 border-b-teal-500">
+                        <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Total Trips</span>
+                        <span class="text-xl font-black text-white" id="trip-view-total-count">0</span>
+                    </div>
+                    <div class="bg-slate-800 border border-slate-700 rounded-xl px-4 py-2 flex flex-col justify-center items-center shadow-sm w-1/2 border-b-2 border-b-red-500">
+                        <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Total Weight</span>
+                        <span class="text-xl font-black text-teal-400"><span id="trip-view-total-weight">0</span><span class="text-xs ml-1 text-slate-500">T</span></span>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <div class="overflow-x-auto w-full">
+                        <table class="w-full text-left whitespace-nowrap min-w-max" id="table-trip">
+                            <thead class="bg-slate-900/50 border-b border-slate-700">
+                                <tr>
+                                    <th>Trip ID & Slip</th>
+                                    <th>Date</th>
+                                    <th>Factory & Acc</th>
+                                    <th>Farmer</th>
+                                    <th>Tractor</th>
+                                    <th class="text-right">Weight (T)</th>
+                                    <th class="text-right">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="trip-table-body" class="divide-y divide-slate-700/50"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FACTORY VIEW -->
+            <div id="factory-view" class="view-section hidden max-w-7xl mx-auto">
+                <div id="factory-header-container"></div>
+                <div class="table-container">
+                    <div class="overflow-x-auto w-full">
+                        <table class="w-full text-left whitespace-nowrap min-w-max" id="table-factory">
+                            <thead class="bg-slate-900/50 border-b border-slate-700">
+                                <tr>
+                                    <th>Factory Details</th>
+                                    <th>Accounts</th>
+                                    <th>Trips</th>
+                                    <th class="text-right">Total Wt (T)</th>
+                                    <th>Note</th>
+                                    <th class="text-right">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="factory-table-body" class="divide-y divide-slate-700/50"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FARMER VIEW -->
+            <div id="farmer-view" class="view-section hidden max-w-7xl mx-auto">
+                <div id="farmer-header-container"></div>
+                <div class="table-container">
+                    <div class="overflow-x-auto w-full">
+                        <table class="w-full text-left whitespace-nowrap min-w-max" id="table-farmer">
+                            <thead class="bg-slate-900/50 border-b border-slate-700">
+                                <tr>
+                                    <th>Farmer Info</th>
+                                    <th>Contact</th>
+                                    <th>Cane Type</th>
+                                    <th>Trips</th>
+                                    <th class="text-right">Total Wt (T)</th>
+                                    <th class="text-right">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="farmer-table-body" class="divide-y divide-slate-700/50"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TRACTOR VIEW -->
+            <div id="tractor-view" class="view-section hidden max-w-7xl mx-auto">
+                <div id="tractor-header-container"></div>
+                <div class="table-container">
+                    <div class="overflow-x-auto w-full">
+                        <table class="w-full text-left whitespace-nowrap min-w-max" id="table-tractor">
+                            <thead class="bg-slate-900/50 border-b border-slate-700">
+                                <tr>
+                                    <th>Tractor Info</th>
+                                    <th>Owner Contact</th>
+                                    <th>Trolly Info</th>
+                                    <th>Trips</th>
+                                    <th class="text-right">Total Wt (T)</th>
+                                    <th class="text-right">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tractor-table-body" class="divide-y divide-slate-700/50"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DRIVER VIEW -->
+            <div id="driver-view" class="view-section hidden max-w-7xl mx-auto">
+                <div id="driver-header-container"></div>
+                <div class="table-container">
+                    <div class="overflow-x-auto w-full">
+                        <table class="w-full text-left whitespace-nowrap min-w-max" id="table-driver">
+                            <thead class="bg-slate-900/50 border-b border-slate-700">
+                                <tr>
+                                    <th>Driver Info</th>
+                                    <th>Contacts</th>
+                                    <th>License</th>
+                                    <th>Trips</th>
+                                    <th class="text-right">Total Wt (T)</th>
+                                    <th class="text-right">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="driver-table-body" class="divide-y divide-slate-700/50"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MUKADAM VIEW -->
+            <div id="mukadam-view" class="view-section hidden max-w-7xl mx-auto">
+                <div id="mukadam-header-container"></div>
+                <div class="table-container">
+                    <div class="overflow-x-auto w-full">
+                        <table class="w-full text-left whitespace-nowrap min-w-max" id="table-mukadam">
+                            <thead class="bg-slate-900/50 border-b border-slate-700">
+                                <tr>
+                                    <th>Mukadam Info</th>
+                                    <th>Contact</th>
+                                    <th>Group Size</th>
+                                    <th>Trips</th>
+                                    <th class="text-right">Total Wt (T)</th>
+                                    <th class="text-right">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="mukadam-table-body" class="divide-y divide-slate-700/50"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SEASON VIEW -->
+            <div id="season-view" class="view-section hidden max-w-7xl mx-auto">
+                <div id="season-header-container"></div>
+                <div class="table-container">
+                    <div class="overflow-x-auto w-full">
+                        <table class="w-full text-left whitespace-nowrap min-w-max" id="table-season">
+                            <thead class="bg-slate-900/50 border-b border-slate-700">
+                                <tr>
+                                    <th>Season Name</th>
+                                    <th>Duration Range</th>
+                                    <th>Description</th>
+                                    <th class="text-right">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="season-table-body" class="divide-y divide-slate-700/50"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PROFILE VIEW -->
+            <div id="profile-view" class="view-section hidden max-w-3xl mx-auto py-2">
+                <div class="bg-slate-800 border border-slate-700 rounded-2xl sm:rounded-[2rem] overflow-hidden shadow-xl">
+                    <div class="h-24 sm:h-32 bg-gradient-to-r from-slate-900 via-teal-900 to-slate-900 relative">
+                        <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+                        <div class="absolute bottom-0 w-full h-12 bg-gradient-to-t from-slate-800 to-transparent"></div>
+                    </div>
+                    <div class="px-6 pb-8 relative bg-slate-800">
+                        <div class="flex flex-col sm:flex-row justify-between items-center sm:items-end -mt-10 sm:-mt-12 mb-6 gap-3">
+                            <div class="w-20 h-20 sm:w-24 sm:h-24 bg-slate-900 rounded-2xl p-1.5 border-4 border-slate-800 shadow-xl z-10">
+                                <div class="w-full h-full bg-slate-800 rounded-xl flex items-center justify-center text-3xl sm:text-4xl text-teal-400 shadow-inner">
+                                    <i class="fas fa-building"></i>
+                                </div>
+                            </div>
+                            <button onclick="window.openModal('profile')" class="w-full sm:w-auto bg-slate-900 border border-slate-600 text-white px-5 py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 hover:bg-slate-700 transition-colors">
+                                <i class="fas fa-edit text-teal-400"></i> Update Business
+                            </button>
+                        </div>
+                        
+                        <div class="text-center sm:text-left mb-6">
+                            <p class="text-[9px] font-black text-teal-500 uppercase tracking-[0.2em] mb-1">Registered Entity</p>
+                            <h3 class="text-2xl sm:text-3xl font-black text-white tracking-tight" id="prof-biz">---</h3>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div class="bg-slate-900/50 p-4 rounded-xl border border-slate-700/50 flex items-center gap-3">
+                                <div class="w-10 h-10 bg-slate-800 rounded-lg flex items-center justify-center text-teal-400 text-base"><i class="fas fa-user-tie"></i></div>
+                                <div>
+                                    <p class="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Owner Name</p>
+                                    <p class="font-bold text-sm text-white" id="prof-owner">---</p>
+                                </div>
+                            </div>
+                            <div class="bg-slate-900/50 p-4 rounded-xl border border-slate-700/50 flex items-center gap-3">
+                                <div class="w-10 h-10 bg-slate-800 rounded-lg flex items-center justify-center text-blue-400 text-base"><i class="fas fa-phone-alt"></i></div>
+                                <div>
+                                    <p class="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Contact</p>
+                                    <p class="font-bold text-sm text-white font-mono" id="prof-phone">---</p>
+                                </div>
+                            </div>
+                            <div class="md:col-span-2 bg-slate-900/50 p-4 rounded-xl border border-slate-700/50 flex items-center gap-3">
+                                <div class="w-10 h-10 bg-slate-800 rounded-lg flex items-center justify-center text-amber-400 text-base"><i class="fas fa-map-marker-alt"></i></div>
+                                <div>
+                                    <p class="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Headquarters</p>
+                                    <p class="font-bold text-xs text-slate-300" id="prof-address">---</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Generic Modal for Forms -->
+    <div id="data-modal" class="fixed inset-0 bg-slate-900/90 backdrop-blur-md hidden items-center justify-center z-[150] p-3 opacity-0 transition-opacity duration-300">
+        <div class="bg-slate-800 border border-slate-700 rounded-2xl sm:rounded-3xl w-full max-w-2xl flex flex-col max-h-[90vh] shadow-2xl transform scale-95 transition-transform duration-300 overflow-hidden" id="modal-content">
+            <div class="h-1 w-full bg-gradient-to-r from-teal-500 to-blue-500"></div>
+            <div class="px-5 py-4 border-b border-slate-700/50 flex justify-between items-center bg-slate-900/50 shrink-0">
+                <div>
+                    <h3 class="text-lg font-black text-white" id="modal-title">Form Title</h3>
+                    <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Provide correct information</p>
+                </div>
+                <button onclick="window.closeModal()" class="w-8 h-8 bg-slate-800 text-slate-400 hover:text-white hover:bg-red-500 rounded-lg flex items-center justify-center transition-colors focus:outline-none"><i class="fas fa-times"></i></button>
+            </div>
+            
+            <div class="p-5 overflow-y-auto scrollbar-hide flex-1 bg-slate-800">
+                <form id="dynamic-form" onsubmit="window.handleFormSubmit(event)">
+                    <input type="hidden" id="form-entity-type">
+                    <input type="hidden" id="form-entity-id">
+                    
+                    <div id="form-fields-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Dynamic fields injected here -->
+                    </div>
+
+                    <div class="mt-6 pt-4 border-t border-slate-700/50 flex flex-col sm:flex-row justify-end gap-3">
+                        <button type="button" onclick="window.closeModal()" class="px-5 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-slate-400 hover:text-white font-bold text-xs transition-colors">Cancel</button>
+                        <button type="submit" id="submit-btn" class="px-6 py-2.5 bg-teal-600 hover:bg-teal-500 text-white rounded-xl font-bold text-xs shadow-lg flex items-center justify-center gap-2"><i class="fas fa-check"></i> Save Data</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Factory Details Sub-Modal for Accounts Breakdown -->
+    <div id="factory-details-modal" class="fixed inset-0 bg-slate-900/90 backdrop-blur-md hidden items-center justify-center z-[160] p-3 opacity-0 transition-opacity duration-300">
+        <div class="bg-slate-800 border border-slate-700 rounded-2xl w-full max-w-2xl flex flex-col max-h-[90vh] shadow-2xl transform scale-95 transition-transform duration-300 overflow-hidden" id="factory-details-content">
+            <div class="h-1 w-full bg-gradient-to-r from-blue-500 to-purple-500"></div>
+            <div class="px-5 py-4 border-b border-slate-700/50 flex justify-between items-center bg-slate-900/50 shrink-0">
+                <div>
+                    <h3 class="text-lg font-black text-white" id="factory-details-title">Factory Name</h3>
+                    <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Account-wise breakdown</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button id="factory-export-btn" class="bg-slate-900 border border-slate-700 hover:border-red-500/50 text-slate-300 hover:text-red-400 px-3 py-1.5 rounded-lg text-[10px] font-bold flex items-center gap-1.5">
+                        <i class="fas fa-file-pdf"></i> PDF
+                    </button>
+                    <button onclick="window.closeFactoryDetails()" class="w-8 h-8 bg-slate-800 text-slate-400 hover:text-white hover:bg-red-500 rounded-lg flex items-center justify-center transition-colors"><i class="fas fa-times"></i></button>
+                </div>
+            </div>
+            <div class="p-5 overflow-y-auto scrollbar-hide flex-1 bg-slate-800">
+                <div class="bg-slate-800 border border-slate-700 rounded-xl overflow-hidden w-full">
+                    <div class="overflow-x-auto w-full">
+                        <table class="w-full text-left whitespace-nowrap min-w-max" id="factory-details-table">
+                            <thead class="bg-slate-900/50 border-b border-slate-700">
+                                <tr>
+                                    <th class="px-4 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Account Name</th>
+                                    <th class="px-4 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Trips</th>
+                                    <th class="px-4 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider text-right">Total Wt (T)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="factory-details-tbody" class="divide-y divide-slate-700/50">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed bottom-4 right-4 transform translate-y-32 opacity-0 transition-all duration-300 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-2xl border border-slate-700 z-[9999] flex items-center gap-3 w-[calc(100vw-2rem)] max-w-xs">
+        <div class="w-8 h-8 rounded-lg bg-teal-500/20 flex items-center justify-center text-teal-400 shrink-0 border border-teal-500/30">
+            <i class="fas fa-check text-sm"></i>
+        </div>
+        <span id="toast-message" class="font-bold text-xs">Message here</span>
+    </div>
+
+    <!-- Firebase & Logic -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInWithCustomToken, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Global State
+        window.appState = {
+            user: null,
+            activeSeason: '',
+            directoryDateFilter: 'all',
+            customStart: '',
+            customEnd: '',
+            farmers: [], tractors: [], drivers: [], mukadams: [], factories: [], trips: [], seasons: [], profile: {}
+        };
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCz4MozbpXSi9LC6l9kwW9m744d-TEqDvI",
+            authDomain: "sugarcanepro-f664a.firebaseapp.com",
+            projectId: "sugarcanepro-f664a",
+            storageBucket: "sugarcanepro-f664a.firebasestorage.app",
+            messagingSenderId: "1057959384031",
+            appId: "1:1057959384031:web:e08945c93d85735ea8ea6a"
+        };
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'sugarcanepro-f664a';
+        
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        const getColName = (name) => name === 'factory' ? 'factories' : `${name}s`;
+
+        const showToast = (message, type = 'success') => {
+            const toast = document.getElementById('toast');
+            const icon = toast.querySelector('i');
+            const iconBox = toast.querySelector('div');
+            document.getElementById('toast-message').innerText = message;
+            
+            if(type === 'error') {
+                icon.className = 'fas fa-exclamation-triangle text-sm text-red-400';
+                iconBox.className = 'w-8 h-8 rounded-lg bg-red-500/20 flex items-center justify-center flex-shrink-0 border border-red-500/30';
+            } else {
+                icon.className = 'fas fa-check text-sm text-teal-400';
+                iconBox.className = 'w-8 h-8 rounded-lg bg-teal-500/20 flex items-center justify-center flex-shrink-0 border border-teal-500/30';
+            }
+
+            toast.classList.remove('translate-y-32', 'opacity-0');
+            setTimeout(() => { toast.classList.add('translate-y-32', 'opacity-0'); }, 4000);
+        };
+
+        window.showToast = showToast;
+
+        const toggleLoading = (show) => {
+            const loader = document.getElementById('loading-overlay');
+            if (show) loader.classList.remove('hidden');
+            else setTimeout(() => loader.classList.add('hidden'), 300);
+        };
+
+        document.getElementById('global-season-selector').addEventListener('change', (e) => {
+            window.appState.activeSeason = e.target.value;
+            const text = e.target.value ? `Season ${e.target.value.replace('20', '')}` : 'No Season';
+            const dst2 = document.getElementById('dash-season-text-2');
+            if(dst2) dst2.innerText = text;
+            reRenderAll();
+        });
+
+        document.getElementById('dash-trip-search').addEventListener('input', function(e) {
+            const query = e.target.value.toLowerCase();
+            const container = document.getElementById('dashboard-recent-trips');
+            if(!container) return;
+
+            const items = container.children;
+            for(let item of items) {
+                let text = item.innerText.toLowerCase();
+                item.style.display = text.includes(query) ? '' : 'none';
+            }
+        });
+
+        // Filter Logic Unified
+            window.appState.directoryDateFilter = type;
+            
+            const wrapper = btn.closest('.dir-filter-wrapper');
+            if(wrapper) {
+                wrapper.querySelectorAll('.dir-filter-btn').forEach(b => b.classList.remove('active-filter'));
+                if(type !== 'custom') btn.classList.add('active-filter');
+                
+                if(type === 'custom') {
+                    const start = wrapper.querySelector('.custom-start').value;
+                    const end = wrapper.querySelector('.custom-end').value;
+                    if(!start || !end) {
+                        showToast("Select Start & End dates.", "error");
+                        return;
+                    }
+                    window.appState.customStart = start;
+                    window.appState.customEnd = end;
+                }
+            }
+            reRenderAll();
+        };
+
+        const getFilteredTrips = () => {
+            let trips = window.appState.trips.filter(t => t.season === window.appState.activeSeason);
+            const filter = window.appState.directoryDateFilter;
+            
+            const today = new Date();
+            today.setHours(0,0,0,0);
+            
+            if (filter === 'weekly') {
+                const lastWeek = new Date(today);
+                lastWeek.setDate(lastWeek.getDate() - 7);
+                trips = trips.filter(t => new Date(t.date) >= lastWeek);
+            } else if (filter === 'monthly') {
+                const lastMonth = new Date(today);
+                lastMonth.setMonth(lastMonth.getMonth() - 1);
+                trips = trips.filter(t => new Date(t.date) >= lastMonth);
+            } else if (filter === 'yearly') {
+                const lastYear = new Date(today);
+                lastYear.setFullYear(lastYear.getFullYear() - 1);
+                trips = trips.filter(t => new Date(t.date) >= lastYear);
+            } else if (filter === 'custom') {
+                const start = window.appState.customStart;
+                const end = window.appState.customEnd;
+                if (start && end) {
+                    trips = trips.filter(t => t.date >= start && t.date <= end);
+                }
+            }
+            return trips;
+        };
+
+        const renderSeasonDropdown = () => {
+            const selector = document.getElementById('global-season-selector');
+            if(!selector) return;
+            
+            const currentVal = window.appState.activeSeason;
+            selector.innerHTML = '';
+            
+            if (!window.appState.seasons || window.appState.seasons.length === 0) {
+                selector.innerHTML = '<option value="">No Seasons</option>';
+                const dst2 = document.getElementById('dash-season-text-2');
+                if(dst2) dst2.innerText = "No Season";
+                return;
+            }
+
+            const sortedSeasons = [...window.appState.seasons].sort((a, b) => (b.name||'').localeCompare(a.name||''));
+            
+            let found = false;
+            sortedSeasons.forEach(s => {
+                const opt = document.createElement('option');
+                opt.value = s.name;
+                opt.innerText = s.name;
+                if (s.name === currentVal) found = true;
+                selector.appendChild(opt);
+            });
+
+            if (!found && sortedSeasons.length > 0) {
+                window.appState.activeSeason = sortedSeasons[0].name;
+            }
+            selector.value = window.appState.activeSeason;
+            
+            const dst2 = document.getElementById('dash-season-text-2');
+            if(dst2) dst2.innerText = window.appState.activeSeason ? `Season ${window.appState.activeSeason.replace('20', '')}` : 'No Season';
+        };
+
+        window.toggleAuthMode = () => {
+            const modeInput = document.getElementById('auth-mode');
+            const btn = document.getElementById('auth-submit-btn');
+            const toggleBtn = document.getElementById('auth-toggle-btn');
+            const subtitle = document.getElementById('auth-subtitle');
+
+            if (modeInput.value === 'login') {
+                modeInput.value = 'register';
+                btn.innerText = 'CREATE ACCOUNT';
+                toggleBtn.innerText = 'Already have an account? Sign In';
+                subtitle.innerText = 'Enter your details to create an account.';
+            } else {
+                modeInput.value = 'login';
+                btn.innerText = 'SIGN IN';
+                toggleBtn.innerText = 'Don\'t have an account? Sign Up';
+                subtitle.innerText = 'Login to manage operations.';
+            }
+        };
+
+        const googleProvider = new GoogleAuthProvider();
+        window.loginWithGoogle = async () => {
+            toggleLoading(true);
+            try {
+                await signInWithPopup(auth, googleProvider);
+                showToast("Google Login Successful!");
+            } catch (error) {
+                showToast(error.message, 'error');
+            }
+            toggleLoading(false);
+        };
+
+        window.handleAuthSubmit = async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('auth-email').value;
+            const password = document.getElementById('auth-password').value;
+            const mode = document.getElementById('auth-mode').value;
+
+            toggleLoading(true);
+            try {
+                if (mode === 'login') {
+                    await signInWithEmailAndPassword(auth, email, password);
+                    showToast("Welcome to Cane Pro!");
+                } else {
+                    await createUserWithEmailAndPassword(auth, email, password);
+                    showToast("Account Created!");
+                }
+            } catch (error) {
+                showToast("Error: " + error.message.replace('Firebase: ', '').trim(), 'error');
+            }
+            toggleLoading(false);
+        };
+
+        window.logout = async () => {
+            await signOut(auth);
+            showToast("Logged out successfully");
+            document.querySelectorAll('tbody').forEach(tb => tb.innerHTML = '');
+        };
+
+        const formConfigs = {
+            profile: [
+                { id: 'businessName', label: 'Business / Company Name', type: 'text', required: true, fullWidth: true, placeholder: 'e.g., Shree Ram Sugarcane Traders' },
+                { id: 'ownerName', label: 'Owner Full Name', type: 'text', required: true, placeholder: 'e.g., Ramesh Patel' },
+                { id: 'phone', label: 'Registered Mobile', type: 'tel', required: true, placeholder: 'e.g., 9876543210' },
+                { id: 'address', label: 'Headquarters Address', type: 'text', required: false, fullWidth: true, placeholder: 'e.g., 101, Main Bazar, Bardoli' }
+            ],
+            season: [
+                { id: 'name', label: 'Season Name', type: 'text', required: true, fullWidth: true, placeholder: 'e.g., 2024-2025' },
+                { id: 'startDate', label: 'Start Date', type: 'date', required: true },
+                { id: 'endDate', label: 'End Date', type: 'date', required: true },
+                { id: 'description', label: 'Description', type: 'textarea', required: false, fullWidth: true, placeholder: 'Aa season ni mukhya nondh ahi lakho...' }
+            ],
+            factory: [
+                { id: 'name', label: 'Factory Name', type: 'text', required: true, placeholder: 'e.g., Madhi Sugar Factory' },
+                { id: 'location', label: 'Location', type: 'text', required: true, placeholder: 'e.g., Madhi, Bardoli' },
+                { id: 'accounts', label: 'Factory Accounts (Comma separated)', type: 'text', required: false, fullWidth: true, placeholder: 'e.g., Account A, Account B, Account C' },
+                { id: 'description', label: 'Note', type: 'textarea', required: false, fullWidth: true, placeholder: 'Factory ni koi anya mahiti...' }
+            ],
+            farmer: [
+                { id: 'name', label: 'Farmer Name', type: 'text', required: true, placeholder: 'e.g., Kanubhai Desai' },
+                { id: 'phone', label: 'Contact no', type: 'tel', required: true, placeholder: 'e.g., 9876543210' },
+                { id: 'location', label: 'Village/Location', type: 'text', required: true, placeholder: 'e.g., Navsari' },
+                { id: 'sugarcaneType', label: 'Sugarcane Type', type: 'text', required: false, placeholder: 'e.g., 86032, Co 0238' },
+                { id: 'description', label: 'Note', type: 'textarea', required: false, fullWidth: true, placeholder: 'Khedut ni koi khass nondh...' }
+            ],
+            tractor: [
+                { id: 'tractorNameType', label: 'Tractor Name & Type', type: 'text', required: true, placeholder: 'e.g., Mahindra 575 DI' },
+                { id: 'number', label: 'Tractor Reg. No', type: 'text', required: true, placeholder: 'e.g., GJ-05-AB-1234' },
+                { id: 'owner', label: 'Owner Name', type: 'text', required: true, placeholder: 'e.g., Sureshbhai Patel' },
+                { id: 'phone', label: 'Contact no', type: 'tel', required: true, placeholder: 'e.g., 9876543210' },
+                { id: 'trollyNameNo', label: 'Trolly Name & No', type: 'text', required: false, fullWidth: true, placeholder: 'e.g., Big Trolley - 01' },
+                { id: 'description', label: 'Note', type: 'textarea', required: false, fullWidth: true, placeholder: 'Tractor ni condition ke mahiti...' }
+            ],
+            driver: [
+                { id: 'name', label: 'Driver Name', type: 'text', required: true, placeholder: 'e.g., Vikram Thakor' },
+                { id: 'license', label: 'License Number', type: 'text', required: false, placeholder: 'e.g., GJ0520110012345' },
+                { id: 'phone', label: 'Contact no 1', type: 'tel', required: true, placeholder: 'e.g., 9876543210' },
+                { id: 'phone2', label: 'Contact no 2', type: 'tel', required: false, placeholder: 'e.g., 9123456789' },
+                { id: 'address', label: 'Address', type: 'text', required: true, fullWidth: true, placeholder: 'e.g., At Post: Vyara' },
+                { id: 'description', label: 'Note', type: 'textarea', required: false, fullWidth: true, placeholder: 'Driver ni anya mahiti...' }
+            ],
+            mukadam: [
+                { id: 'name', label: 'Mukadam Name', type: 'text', required: true, placeholder: 'e.g., Rakeshbhai' },
+                { id: 'phone', label: 'Contact no', type: 'tel', required: true, placeholder: 'e.g., 9876543210' },
+                { id: 'groupSize', label: 'Group Size', type: 'number', required: true, placeholder: 'e.g., 15' },
+                { id: 'address', label: 'Address', type: 'text', required: true, placeholder: 'e.g., Bardoli' },
+                { id: 'description', label: 'Note', type: 'textarea', required: false, fullWidth: true, placeholder: 'Majoor (labour) ni mahiti...' }
+            ],
+            trip: [
+                { id: 'tripId', label: 'Trip ID (Auto)', type: 'text', required: true, readonly: true },
+                { id: 'slipNo', label: 'Factory Slip No (Manual)', type: 'text', required: false, placeholder: 'e.g., 54321' },
+                { id: 'date', label: 'Date', type: 'date', required: true },
+                { id: 'time', label: 'Time', type: 'time', required: true },
+                { id: 'weight', label: 'Net Weight (Ton)', type: 'number', step: '0.01', required: true, placeholder: 'e.g., 12.50' },
+                { id: 'farmerId', label: 'Select Farmer', type: 'select', optionsSrc: 'farmers', required: true },
+                { id: 'mukadamId', label: 'Select Mukadam', type: 'select', optionsSrc: 'mukadams', required: true },
+                { id: 'tractorId', label: 'Select Tractor', type: 'select', optionsSrc: 'tractors', required: true },
+                { id: 'driverId', label: 'Select Driver', type: 'select', optionsSrc: 'drivers', required: true },
+                { id: 'factoryId', label: 'Select Factory', type: 'select', optionsSrc: 'factories', required: true },
+                { id: 'factoryAccount', label: 'Factory Account', type: 'select', optionsSrc: 'dynamic_accounts', required: false },
+                { id: 'location', label: 'Pickup Location', type: 'text', required: false, fullWidth: true, placeholder: 'e.g., Farm Plot 3, Navsari' },
+                { id: 'description', label: 'Note', type: 'textarea', required: false, fullWidth: true, placeholder: 'Fera ni khass nondh...' }
+            ]
+        };
+
+        window.openFactoryDetails = (factoryId) => {
+            const factory = (window.appState.factories || []).find(f => f.id === factoryId);
+            if(!factory) return;
+
+            document.getElementById('factory-details-title').innerText = factory.name || 'Factory';
+            
+            const filteredTrips = getFilteredTrips().filter(t => t.factoryId === factoryId);
+            const accountStats = {};
+            
+            filteredTrips.forEach(t => {
+                const acc = t.factoryAccount || 'No Account';
+                if(!accountStats[acc]) accountStats[acc] = { trips: 0, weight: 0 };
+                accountStats[acc].trips++;
+                accountStats[acc].weight += (Number(t.weight) || 0);
+            });
+
+            const tbody = document.getElementById('factory-details-tbody');
+            tbody.innerHTML = '';
+            let totalTrips = 0, totalWeight = 0;
+
+            Object.keys(accountStats).sort().forEach(acc => {
+                const stats = accountStats[acc];
+                totalTrips += stats.trips; totalWeight += stats.weight;
+                tbody.innerHTML += `
+                    <tr class="border-b border-slate-700/50 hover:bg-slate-800 transition-colors">
+                        <td class="px-4 py-3 font-bold text-white text-xs">${acc}</td>
+                        <td class="px-4 py-3 font-black text-blue-400 text-xs">${stats.trips}</td>
+                        <td class="px-4 py-3 font-black text-teal-400 text-xs text-right">${stats.weight.toFixed(2)}</td>
+                    </tr>
+                `;
+            });
+
+            if(Object.keys(accountStats).length === 0) {
+                tbody.innerHTML = `<tr><td colspan="3" class="px-4 py-6 text-center text-slate-500 font-bold text-xs">No trips recorded for this factory.</td></tr>`;
+            } else if (Object.keys(accountStats).length > 1) {
+                tbody.innerHTML += `
+                    <tr class="bg-slate-900 border-t-2 border-slate-700">
+                        <td class="px-4 py-3 font-black text-white text-right text-xs">Total:</td>
+                        <td class="px-4 py-3 font-black text-blue-400 text-xs">${totalTrips}</td>
+                        <td class="px-4 py-3 font-black text-teal-400 text-xs text-right">${totalWeight.toFixed(2)}</td>
+                    </tr>
+                `;
+            }
+
+            document.getElementById('factory-export-btn').onclick = () => window.exportPDF('factory-details-table', `Account Breakdown - ${factory.name}`);
+
+            const modal = document.getElementById('factory-details-modal');
+            const content = document.getElementById('factory-details-content');
+            modal.classList.remove('hidden'); modal.classList.add('flex');
+            setTimeout(() => { modal.classList.remove('opacity-0'); content.classList.remove('scale-95'); }, 10);
+        };
+
+        window.closeFactoryDetails = () => {
+            const modal = document.getElementById('factory-details-modal');
+            const content = document.getElementById('factory-details-content');
+            modal.classList.add('opacity-0'); content.classList.add('scale-95');
+            setTimeout(() => { modal.classList.add('hidden'); modal.classList.remove('flex'); }, 300);
+        };
+
+        window.exportPDF = (tableId, title) => {
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF('landscape');
+                const p = window.appState.profile || {};
+                const bName = p.businessName || 'CANE PRO MANAGEMENT';
+                const pageWidth = doc.internal.pageSize.width;
+
+                doc.setFillColor(15, 23, 42); doc.rect(0, 0, pageWidth, 35, 'F');
+                doc.setFillColor(20, 184, 166); doc.rect(0, 35, pageWidth, 2, 'F');
+
+                doc.setTextColor(255, 255, 255); doc.setFontSize(22); doc.setFont("helvetica", "bold"); doc.text("Cane Pro", 14, 22);
+                doc.setFontSize(10); doc.setFont("helvetica", "normal"); doc.text(bName, 14, 30);
+
+                doc.setTextColor(15, 23, 42); doc.setFontSize(16); doc.setFont("helvetica", "bold"); doc.text(`${title} Report`, 14, 50);
+
+                let filterTxt = window.appState.directoryDateFilter.toUpperCase();
+                if(filterTxt === 'CUSTOM') filterTxt = `${window.appState.customStart} TO ${window.appState.customEnd}`;
+                if(filterTxt === 'ALL') filterTxt = 'ALL TIME';
+
+                doc.setFontSize(9); doc.setTextColor(100, 116, 139); doc.setFont("helvetica", "normal");
+                doc.text(`Season: ${window.appState.activeSeason || 'N/A'}  |  Period: ${filterTxt}`, 14, 57);
+                doc.text(`Generated On: ${new Date().toLocaleString('en-IN')}`, pageWidth - 14, 57, { align: 'right' });
+
+                doc.autoTable({
+                    html: `#${tableId}`, startY: 65, theme: 'grid',
+                    headStyles: { fillColor: [15, 23, 42], textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 9 },
+                    alternateRowStyles: { fillColor: [248, 250, 252] },
+                    styles: { font: 'helvetica', fontSize: 8, cellPadding: 3, textColor: [51, 65, 85] },
+                    columns: Array.from(document.querySelectorAll(`#${tableId} th`)).map((th, i) => ({ dataKey: i, header: th.innerText })).filter(col => col.header.toLowerCase() !== 'action'),
+                    didParseCell: function(data) {
+                        if(data.row.raw && data.row.raw.innerText && data.row.raw.innerText.toLowerCase().includes('total')) {
+                            data.cell.styles.fontStyle = 'bold'; data.cell.styles.fillColor = [226, 232, 240]; data.cell.styles.textColor = [15, 23, 42];
+                        }
+                    }
+                });
+                
+                doc.save(`CanePro_${title.replace(/\s+/g, '_')}_Report.pdf`);
+                showToast("Premium PDF Generated!");
+            } catch(e) { console.error(e); showToast("PDF generation error.", 'error'); }
+        };
+
+        const setupHeaders = () => {
+            const views = [ { id: 'trip', title: 'Trip Deliveries Log' }, { id: 'factory', title: 'Factories Directory' }, { id: 'farmer', title: 'Farmers Network' }, { id: 'tractor', title: 'Fleet Directory' }, { id: 'driver', title: 'Drivers List' }, { id: 'mukadam', title: 'Mukadam Registry' }, { id: 'season', title: 'Season Management' } ];
+            const template = document.getElementById('list-header-template');
+            views.forEach(v => {
+                const container = document.getElementById(`${v.id}-header-container`);
+                if(container) {
+                    const clone = template.content.cloneNode(true);
+                    clone.querySelector('.list-title').innerText = v.title;
+                    clone.querySelector('.add-new-btn').onclick = () => window.openModal(v.id);
+                    clone.querySelector('.export-pdf-btn').onclick = () => window.exportPDF(`table-${v.id}`, v.title);
+                    container.appendChild(clone);
+                }
+            });
+        };
+        setupHeaders();
+
+        const sidebar = document.getElementById('sidebar-container');
+        const overlay = document.getElementById('sidebar-overlay');
+        
+        const closeSidebar = () => {
+            sidebar.classList.add('-translate-x-full');
+            overlay.classList.add('opacity-0');
+            setTimeout(() => overlay.classList.add('hidden'), 300);
+        };
+
+        document.getElementById('open-sidebar').addEventListener('click', () => {
+            overlay.classList.remove('hidden');
+            setTimeout(() => overlay.classList.remove('opacity-0'), 10);
+            sidebar.classList.remove('-translate-x-full');
+        });
+        document.getElementById('close-sidebar').addEventListener('click', closeSidebar);
+        overlay.addEventListener('click', closeSidebar);
+
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const currentLink = e.currentTarget;
+                
+                document.querySelectorAll('.nav-link').forEach(l => {
+                    l.classList.remove('bg-teal-500/10', 'text-teal-400', 'border-teal-500');
+                    l.classList.add('text-slate-400', 'border-transparent');
+                });
+                currentLink.classList.add('bg-teal-500/10', 'text-teal-400', 'border-teal-500');
+                currentLink.classList.remove('text-slate-400', 'border-transparent');
+
+                const targetId = currentLink.getAttribute('data-target');
+                document.querySelectorAll('.view-section').forEach(view => view.classList.add('hidden'));
+                document.getElementById(targetId).classList.remove('hidden');
+
+                const titleText = currentLink.innerText.trim().replace('Not Logged In', '').replace('My Profile', 'Profile').trim();
+                const pgTitle = document.getElementById('page-title');
+                if(pgTitle) pgTitle.innerHTML = titleText;
+                
+                if (window.innerWidth < 1024) closeSidebar();
+            });
+        });
+
+        const generateTripId = () => {
+            const activeSeason = window.appState.activeSeason;
+            if (!activeSeason) return 'TRP-001'; 
+            
+            const seasonalTrips = (window.appState.trips||[]).filter(t => t.season === activeSeason);
+            let maxSeq = 0;
+            seasonalTrips.forEach(t => {
+                if (t.tripId) {
+                    const parts = t.tripId.split('-');
+                    const num = parseInt(parts[parts.length - 1], 10);
+                    if (!isNaN(num) && num > maxSeq) maxSeq = num;
+                }
+            });
+            const nextSeq = maxSeq + 1;
+            const shortSeason = activeSeason.split('-').map(y => y.slice(-2)).join('-');
+            return `TRP-${shortSeason}-${String(nextSeq).padStart(3, '0')}`;
+        };
+
+        window.openModal = (entityType, editData = null) => {
+            const config = formConfigs[entityType];
+            const container = document.getElementById('form-fields-container');
+            container.innerHTML = '';
+            
+            document.getElementById('modal-title').innerText = editData ? `Edit ${entityType}` : `Add ${entityType}`;
+            document.getElementById('form-entity-type').value = entityType;
+            document.getElementById('form-entity-id').value = editData ? editData.id : (entityType === 'profile' ? 'main' : '');
+
+            config.forEach(field => {
+                const wrapper = document.createElement('div');
+                if (field.fullWidth) wrapper.className = 'md:col-span-2';
+                
+                const label = document.createElement('label');
+                label.className = 'block text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1';
+                label.innerText = field.label;
+                wrapper.appendChild(label);
+
+                if (field.type === 'select') {
+                    const selectWrapper = document.createElement('div');
+                    selectWrapper.className = 'select-wrapper';
+                    
+                    const select = document.createElement('select');
+                    select.id = `input-${field.id}`;
+                    select.className = 'w-full premium-input rounded-lg px-3 py-2 text-xs font-medium cursor-pointer appearance-none';
+                    select.required = field.required;
+                    
+                    const defaultOpt = document.createElement('option');
+                    defaultOpt.value = ''; defaultOpt.innerText = '-- Select Option --';
+                    select.appendChild(defaultOpt);
+
+                    if(field.optionsSrc !== 'dynamic_accounts') {
+                        const optionsList = window.appState[getColName(field.optionsSrc.replace('s', ''))] || window.appState[field.optionsSrc] || [];
+                        optionsList.forEach(opt => {
+                            const optionElement = document.createElement('option');
+                            optionElement.value = opt.id;
+                            if(field.optionsSrc === 'farmers' || field.optionsSrc === 'drivers' || field.optionsSrc === 'mukadams' || field.optionsSrc === 'factories') optionElement.innerText = opt.name || 'Unknown';
+                            else if(field.optionsSrc === 'tractors') optionElement.innerText = `${opt.tractorNameType || opt.number || 'Tractor'} (${opt.owner || 'Unknown'})`;
+                            select.appendChild(optionElement);
+                        });
+                    }
+
+                    if(field.id === 'factoryId') {
+                        select.addEventListener('change', (e) => {
+                            const accSelect = document.getElementById('input-factoryAccount');
+                            if(!accSelect) return;
+                            accSelect.innerHTML = `<option value="">Select Account</option>`;
+                            const selFac = (window.appState.factories||[]).find(f => f.id === e.target.value);
+                            if(selFac && selFac.accounts) {
+                                const accList = selFac.accounts.split(',').map(s=>s.trim()).filter(Boolean);
+                                accList.forEach(acc => {
+                                    const opt = document.createElement('option');
+                                    opt.value = acc; opt.innerText = acc;
+                                    accSelect.appendChild(opt);
+                                });
+                            }
+                        });
+                    }
+
+                    if (editData && editData[field.id] && field.optionsSrc !== 'dynamic_accounts') select.value = editData[field.id];
+                    selectWrapper.appendChild(select); wrapper.appendChild(selectWrapper);
+
+                } else if (field.type === 'textarea') {
+                    const textarea = document.createElement('textarea');
+                    textarea.id = `input-${field.id}`; textarea.rows = 2;
+                    textarea.className = 'w-full premium-input rounded-lg px-3 py-2 text-xs font-medium resize-none';
+                    textarea.required = field.required; textarea.placeholder = field.placeholder || '';
+                    if (editData && editData[field.id]) textarea.value = editData[field.id];
+                    wrapper.appendChild(textarea);
+                } else {
+                    const input = document.createElement('input');
+                    input.type = field.type; input.id = `input-${field.id}`;
+                    if(field.step) input.step = field.step;
+                    
+                    if(field.readonly) {
+                        input.readOnly = true;
+                        input.value = editData ? (editData[field.id] || '') : (field.id === 'tripId' ? generateTripId() : '');
+                        input.className = 'w-full premium-input rounded-lg px-3 py-2 text-xs font-bold text-slate-500 bg-slate-900/50 cursor-not-allowed border-slate-700/50';
+                    } else if(field.type === 'date' && !editData) {
+                        input.valueAsDate = new Date();
+                    } else if(field.type === 'time' && !editData) {
+                        const now = new Date(); input.value = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+                    } else if (editData && editData[field.id]) { input.value = editData[field.id]; }
+
+                    if(!field.readonly) input.className = 'w-full premium-input rounded-lg px-3 py-2 text-xs font-medium';
+                    
+                    input.required = field.required; input.placeholder = field.placeholder || '';
+                    wrapper.appendChild(input);
+                }
+                container.appendChild(wrapper);
+            });
+
+            if(entityType === 'trip' && editData && editData.factoryId) {
+                setTimeout(() => {
+                    const fSelect = document.getElementById('input-factoryId');
+                    if(fSelect) fSelect.dispatchEvent(new Event('change'));
+                    setTimeout(() => {
+                        const accSelect = document.getElementById('input-factoryAccount');
+                        if(accSelect) accSelect.value = editData.factoryAccount || '';
+                    }, 50);
+                }, 50);
+            }
+
+            const modal = document.getElementById('data-modal'); const content = document.getElementById('modal-content');
+            modal.classList.remove('hidden'); modal.classList.add('flex');
+            setTimeout(() => { modal.classList.remove('opacity-0'); content.classList.remove('scale-95'); }, 10);
+        };
+
+        window.closeModal = () => {
+            const modal = document.getElementById('data-modal'); const content = document.getElementById('modal-content');
+            modal.classList.add('opacity-0'); content.classList.add('scale-95');
+            setTimeout(() => { modal.classList.add('hidden'); modal.classList.remove('flex'); document.getElementById('dynamic-form').reset(); }, 300);
+        };
+
+        window.handleFormSubmit = async (e) => {
+            e.preventDefault();
+            if (!window.appState.user) return showToast('Error: Login required', 'error');
+
+            const entityType = document.getElementById('form-entity-type').value;
+            const entityId = document.getElementById('form-entity-id').value;
+            const config = formConfigs[entityType];
+            const data = {};
+            config.forEach(field => {
+                const el = document.getElementById(`input-${field.id}`);
+                if(el) {
+                    if(field.type === 'number') {
+                        data[field.id] = el.value === '' ? 0 : parseFloat(el.value) || 0;
+                    } else {
+                        data[field.id] = el.value;
+                    }
+                }
+            });
+            
+            if(entityType === 'trip') {
+                if(!window.appState.activeSeason) {
+                    showToast("Pehla Season Create Karo!", "error");
+                    return;
+                }
+                data.season = window.appState.activeSeason;
+            }
+
+            data.timestamp = Date.now();
+            toggleLoading(true);
+            try {
+                const uid = window.appState.user.uid;
+                const colName = getColName(entityType);
+                const collectionPath = `artifacts/${appId}/users/${uid}/${colName}`;
+                const docId = entityId || Math.random().toString(36).substring(2, 15);
+                
+                const colRef = collection(db, collectionPath);
+                const docRef = doc(colRef, docId);
+                await setDoc(docRef, data);
+                
+                showToast(`Data Saved Successfully!`);
+                window.closeModal();
+            } catch (error) { 
+                console.error("Save Error: ", error);
+                showToast(`Error saving: ${error.message}`, 'error'); 
+            }
+            toggleLoading(false);
+        };
+
+        window.deleteRecord = async (entityType, id) => {
+            if(!window.appState.user) return;
+            try {
+                const uid = window.appState.user.uid;
+                await deleteDoc(doc(db, `artifacts/${appId}/users/${uid}/${getColName(entityType)}`, id));
+                showToast(`Record Deleted`);
+            } catch (error) { showToast(`Error: ${error.message}`, 'error'); }
+        };
+
+        window.editRecord = (entityType, id) => {
+            const dataList = window.appState[getColName(entityType)] || (entityType === 'profile' ? [window.appState.profile] : []);
+            const data = entityType === 'profile' ? window.appState.profile : dataList.find(item => item.id === id);
+            if(data) window.openModal(entityType, data);
+        };
+
+        window.printSlip = (tripId) => {
+            const trip = (window.appState.trips||[]).find(t => t.id === tripId);
+            if(!trip) return;
+
+            const factory = (window.appState.factories||[]).find(f => f.id === trip.factoryId)?.name || '-';
+            const farmer = (window.appState.farmers||[]).find(f => f.id === trip.farmerId)?.name || '-';
+            const tractorObj = (window.appState.tractors||[]).find(t => t.id === trip.tractorId);
+            const tractor = tractorObj ? `${tractorObj.tractorNameType} (${tractorObj.number})` : '-';
+            const driver = (window.appState.drivers||[]).find(d => d.id === trip.driverId)?.name || '-';
+            const profile = window.appState.profile || {};
+
+            try {
+                const { jsPDF } = window.jspdf; const doc = new jsPDF({ format: 'a5' }); let y = 15;
+                doc.setFontSize(20); doc.setFont("helvetica", "bold"); doc.text(profile.businessName || "CANE PRO DELIVERY SLIP", 74, y, { align: "center" }); y += 8;
+                doc.setFontSize(9); doc.setFont("helvetica", "normal");
+                if(profile.address) { doc.text(profile.address, 74, y, { align: "center" }); y += 5; }
+                if(profile.phone) { doc.text(`Contact: ${profile.phone}`, 74, y, { align: "center" }); y += 5; }
+                
+                y += 5; doc.setLineWidth(0.5); doc.setDrawColor(15, 23, 42); doc.line(10, y, 138, y); y += 10;
+                doc.setFontSize(12); doc.setFont("helvetica", "bold");
+                doc.text(`TRIP ID: ${trip.tripId || '-'}`, 10, y); doc.text(`DATE: ${trip.date} ${trip.time||''}`, 80, y); y += 8;
+                doc.text(`FACTORY SLIP: ${trip.slipNo || 'Pending'}`, 10, y); y += 12;
+
+                doc.setFontSize(11); doc.setFont("helvetica", "normal");
+                doc.text(`Factory:`, 10, y); doc.setFont("helvetica", "bold"); doc.text(`${factory} ${trip.factoryAccount ? '('+trip.factoryAccount+')' : ''}`, 45, y); y += 8;
+                doc.setFont("helvetica", "normal"); doc.text(`Farmer:`, 10, y); doc.setFont("helvetica", "bold"); doc.text(farmer, 45, y); y += 8;
+                doc.setFont("helvetica", "normal"); doc.text(`Tractor:`, 10, y); doc.setFont("helvetica", "bold"); doc.text(tractor, 45, y); y += 8;
+                doc.setFont("helvetica", "normal"); doc.text(`Driver:`, 10, y); doc.setFont("helvetica", "bold"); doc.text(driver, 45, y); y += 12;
+
+                doc.setFillColor(241, 245, 249); doc.rect(10, y-6, 128, 14, 'F');
+                doc.setFontSize(14); doc.text(`Total Weight:`, 15, y); doc.text(`${trip.weight} Ton`, 55, y); y += 15;
+
+                doc.setLineWidth(0.2); doc.line(10, y, 138, y); y += 10;
+                doc.setFontSize(9); doc.setFont("helvetica", "italic"); doc.text("Authorized Sign / Stamp", 100, y+10);
+                doc.save(`CanePro_Slip_${trip.tripId || tripId}.pdf`);
+                showToast("Slip print generated!");
+            } catch(e) { console.error(e); showToast("Slip print error.", 'error'); }
+        };
+
+        // Render Functions with Try-Catch
+        const renderProfile = () => {
+            const p = window.appState.profile || {};
+            const e1 = document.getElementById('prof-biz'); if(e1) e1.innerText = p.businessName || 'Business Name Set Karo';
+            const e2 = document.getElementById('prof-owner'); if(e2) e2.innerText = p.ownerName || '-';
+            const e3 = document.getElementById('prof-phone'); if(e3) e3.innerText = p.phone || '-';
+            const e4 = document.getElementById('prof-address'); if(e4) e4.innerText = p.address || '-';
+        };
+
+        const renderSeasons = () => {
+            const tbody = document.getElementById('season-table-body');
+            if(!tbody) return;
+            tbody.innerHTML = '';
+            [...(window.appState.seasons||[])].sort((a,b) => (b.timestamp||0) - (a.timestamp||0)).forEach(item => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td class="px-4 py-3"><span class="bg-teal-500/20 text-teal-400 font-bold px-2 py-1 rounded-md text-[10px] sm:text-xs">${item.name||'-'}</span></td>
+                        <td class="px-4 py-3"><span class="text-slate-300 font-mono text-[10px] sm:text-xs">${item.startDate||'-'} to ${item.endDate||'-'}</span></td>
+                        <td class="px-4 py-3"><span class="text-slate-400 text-[9px] sm:text-[10px] truncate max-w-[100px] sm:max-w-xs block" title="${item.description || ''}">${item.description || '-'}</span></td>
+                        <td class="px-4 py-3 text-right">
+                            <button onclick="window.editRecord('season', '${item.id}')" class="text-slate-400 hover:text-blue-400 mx-1 sm:mx-2"><i class="fas fa-edit"></i></button>
+                            <button onclick="window.deleteRecord('season', '${item.id}')" class="text-slate-400 hover:text-red-400 mx-1 sm:mx-2"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+        };
+
+        const renderFactories = () => {
+            const tbody = document.getElementById('factory-table-body');
+            if(!tbody) return;
+            tbody.innerHTML = '';
+            const filteredTrips = getFilteredTrips() || [];
+            let sumTrips = 0, sumWeight = 0;
+
+            (window.appState.factories||[]).map(f => {
+                const fTrips = filteredTrips.filter(t => t.factoryId === f.id);
+                const totalWt = fTrips.reduce((sum, t) => sum + (Number(t.weight) || 0), 0);
+                sumTrips += fTrips.length; sumWeight += totalWt;
+                return { ...f, tripCount: fTrips.length, totalWeight: totalWt.toFixed(2) };
+            }).forEach(item => {
+                const char = item.name ? item.name.charAt(0).toUpperCase() : '?';
+                tbody.innerHTML += `
+                    <tr>
+                        <td class="px-4 py-3">
+                            <div class="flex items-center gap-2 sm:gap-3">
+                                <div class="w-8 h-8 rounded-lg bg-teal-500/20 text-teal-400 flex items-center justify-center font-black text-xs shrink-0">${char}</div>
+                                <div>
+                                    <span class="font-bold text-white text-[11px] sm:text-xs block">${item.name||'Unknown'}</span>
+                                    <span class="text-slate-400 font-bold text-[9px] sm:text-[10px]"><i class="fas fa-map-marker-alt mr-1"></i>${item.location||'-'}</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-4 py-3"><span class="text-slate-400 text-[9px] sm:text-[10px] truncate max-w-[100px] block" title="${item.accounts || '-'}">${item.accounts || '-'}</span></td>
+                        <td class="px-4 py-3"><span class="font-bold text-blue-400 text-xs sm:text-sm">${item.tripCount}</span></td>
+                        <td class="px-4 py-3"><span class="font-black text-teal-400 text-sm sm:text-base">${item.totalWeight}</span></td>
+                        <td class="px-4 py-3"><span class="text-slate-400 text-[9px] sm:text-[10px] truncate max-w-[80px] block">${item.description || '-'}</span></td>
+                        <td class="px-4 py-3 text-right space-x-1 whitespace-nowrap">
+                            <button onclick="window.openFactoryDetails('${item.id}')" class="text-slate-400 hover:text-emerald-400 mx-1" title="View Account Details"><i class="fas fa-eye"></i></button>
+                            <button onclick="window.editRecord('factory', '${item.id}')" class="text-slate-400 hover:text-blue-400 mx-1"><i class="fas fa-edit"></i></button>
+                            <button onclick="window.deleteRecord('factory', '${item.id}')" class="text-slate-400 hover:text-red-400 mx-1"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+            if(sumTrips > 0) {
+                 tbody.innerHTML += `<tr class="bg-slate-800"><td colspan="2" class="px-4 py-3 text-right font-black text-white text-[11px] sm:text-xs">Total Filtered:</td><td class="px-4 py-3 font-black text-blue-400 text-xs sm:text-sm">${sumTrips}</td><td class="px-4 py-3 font-black text-teal-400 text-sm sm:text-base">${sumWeight.toFixed(2)}</td><td></td><td></td></tr>`;
+            }
+        };
+
+        const renderFarmers = () => {
+            const tbody = document.getElementById('farmer-table-body');
+            if(!tbody) return;
+            tbody.innerHTML = '';
+            const filteredTrips = getFilteredTrips() || [];
+            let sumTrips = 0, sumWeight = 0;
+
+            (window.appState.farmers||[]).map(f => {
+                const fTrips = filteredTrips.filter(t => t.farmerId === f.id);
+                const totalWt = fTrips.reduce((sum, t) => sum + (Number(t.weight) || 0), 0);
+                sumTrips += fTrips.length; sumWeight += totalWt;
+                return { ...f, tripCount: fTrips.length, totalWeight: totalWt.toFixed(2) };
+            }).forEach(item => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td class="px-4 py-3">
+                            <span class="font-bold text-white block text-[11px] sm:text-xs">${item.name||'Unknown'}</span>
+                            <span class="text-[9px] text-slate-400 block truncate max-w-[120px]"><i class="fas fa-map-marker-alt mr-1"></i>${item.location||'-'}</span>
+                        </td>
+                        <td class="px-4 py-3"><span class="font-mono text-slate-300 text-[10px] sm:text-xs">${item.phone||'-'}</span></td>
+                        <td class="px-4 py-3"><span class="text-slate-400 text-[10px]">${item.sugarcaneType || '-'}</span></td>
+                        <td class="px-4 py-3"><span class="font-bold text-blue-400 text-xs sm:text-sm">${item.tripCount}</span></td>
+                        <td class="px-4 py-3"><span class="font-black text-teal-400 text-sm sm:text-base">${item.totalWeight}</span></td>
+                        <td class="px-4 py-3 text-right whitespace-nowrap">
+                            <button onclick="window.editRecord('farmer', '${item.id}')" class="text-slate-400 hover:text-blue-400 mx-1"><i class="fas fa-edit"></i></button>
+                            <button onclick="window.deleteRecord('farmer', '${item.id}')" class="text-slate-400 hover:text-red-400 mx-1"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+            if(sumTrips > 0) tbody.innerHTML += `<tr class="bg-slate-800"><td colspan="3" class="px-4 py-3 text-right font-black text-white text-[11px] sm:text-xs">Total Filtered:</td><td class="px-4 py-3 font-black text-blue-400 text-xs sm:text-sm">${sumTrips}</td><td class="px-4 py-3 font-black text-teal-400 text-sm sm:text-base">${sumWeight.toFixed(2)}</td><td></td></tr>`;
+        };
+
+        const renderTractors = () => {
+            const tbody = document.getElementById('tractor-table-body');
+            if(!tbody) return;
+            tbody.innerHTML = '';
+            const filteredTrips = getFilteredTrips() || [];
+            let sumTrips = 0, sumWeight = 0;
+
+            (window.appState.tractors||[]).map(f => {
+                const fTrips = filteredTrips.filter(t => t.tractorId === f.id);
+                const totalWt = fTrips.reduce((sum, t) => sum + (Number(t.weight) || 0), 0);
+                sumTrips += fTrips.length; sumWeight += totalWt;
+                return { ...f, tripCount: fTrips.length, totalWeight: totalWt.toFixed(2) };
+            }).forEach(item => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td class="px-4 py-3">
+                            <span class="font-bold text-white block text-[11px] sm:text-xs">${item.tractorNameType||'Unknown'}</span>
+                            <span class="font-mono text-[9px] text-teal-400 block">${item.number||'-'}</span>
+                        </td>
+                        <td class="px-4 py-3">
+                            <span class="text-slate-300 text-[10px] sm:text-xs block">${item.owner||'Unknown'}</span>
+                            <span class="font-mono text-[9px] text-slate-500 block">${item.phone||'-'}</span>
+                        </td>
+                        <td class="px-4 py-3"><span class="text-slate-400 text-[9px] sm:text-[10px] block truncate max-w-[80px]">${item.trollyNameNo || '-'}</span></td>
+                        <td class="px-4 py-3"><span class="font-bold text-blue-400 text-xs sm:text-sm">${item.tripCount}</span></td>
+                        <td class="px-4 py-3"><span class="font-black text-teal-400 text-sm sm:text-base">${item.totalWeight}</span></td>
+                        <td class="px-4 py-3 text-right whitespace-nowrap">
+                            <button onclick="window.editRecord('tractor', '${item.id}')" class="text-slate-400 hover:text-blue-400 mx-1"><i class="fas fa-edit"></i></button>
+                            <button onclick="window.deleteRecord('tractor', '${item.id}')" class="text-slate-400 hover:text-red-400 mx-1"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+             if(sumTrips > 0) tbody.innerHTML += `<tr class="bg-slate-800"><td colspan="3" class="px-4 py-3 text-right font-black text-white text-[11px] sm:text-xs">Total Filtered:</td><td class="px-4 py-3 font-black text-blue-400 text-xs sm:text-sm">${sumTrips}</td><td class="px-4 py-3 font-black text-teal-400 text-sm sm:text-base">${sumWeight.toFixed(2)}</td><td></td></tr>`;
+        };
+
+        const renderDrivers = () => {
+            const tbody = document.getElementById('driver-table-body');
+            if(!tbody) return;
+            tbody.innerHTML = '';
+            const filteredTrips = getFilteredTrips() || [];
+            let sumTrips = 0, sumWeight = 0;
+
+            (window.appState.drivers||[]).map(f => {
+                const fTrips = filteredTrips.filter(t => t.driverId === f.id);
+                const totalWt = fTrips.reduce((sum, t) => sum + (Number(t.weight) || 0), 0);
+                sumTrips += fTrips.length; sumWeight += totalWt;
+                return { ...f, tripCount: fTrips.length, totalWeight: totalWt.toFixed(2) };
+            }).forEach(item => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td class="px-4 py-3">
+                            <span class="font-bold text-white block text-[11px] sm:text-xs">${item.name||'Unknown'}</span>
+                            <span class="text-[9px] text-slate-400 truncate max-w-[120px] sm:max-w-[150px] block" title="${item.address||''}">${item.address||'-'}</span>
+                        </td>
+                        <td class="px-4 py-3">
+                            <span class="font-mono text-slate-300 text-[10px] sm:text-xs block">${item.phone||'-'}</span>
+                            <span class="font-mono text-slate-500 text-[9px] block">${item.phone2 || ''}</span>
+                        </td>
+                        <td class="px-4 py-3"><span class="font-mono text-[9px] sm:text-[10px] text-slate-400">${item.license || '-'}</span></td>
+                        <td class="px-4 py-3"><span class="font-bold text-blue-400 text-xs sm:text-sm">${item.tripCount}</span></td>
+                        <td class="px-4 py-3"><span class="font-black text-teal-400 text-sm sm:text-base">${item.totalWeight}</span></td>
+                        <td class="px-4 py-3 text-right whitespace-nowrap">
+                            <button onclick="window.editRecord('driver', '${item.id}')" class="text-slate-400 hover:text-blue-400 mx-1"><i class="fas fa-edit"></i></button>
+                            <button onclick="window.deleteRecord('driver', '${item.id}')" class="text-slate-400 hover:text-red-400 mx-1"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+             if(sumTrips > 0) tbody.innerHTML += `<tr class="bg-slate-800"><td colspan="3" class="px-4 py-3 text-right font-black text-white text-[11px] sm:text-xs">Total Filtered:</td><td class="px-4 py-3 font-black text-blue-400 text-xs sm:text-sm">${sumTrips}</td><td class="px-4 py-3 font-black text-teal-400 text-sm sm:text-base">${sumWeight.toFixed(2)}</td><td></td></tr>`;
+        };
+
+        const renderMukadams = () => {
+            const tbody = document.getElementById('mukadam-table-body');
+            if(!tbody) return;
+            tbody.innerHTML = '';
+            const filteredTrips = getFilteredTrips() || [];
+            let sumTrips = 0, sumWeight = 0;
+
+            (window.appState.mukadams||[]).map(f => {
+                const fTrips = filteredTrips.filter(t => t.mukadamId === f.id);
+                const totalWt = fTrips.reduce((sum, t) => sum + (Number(t.weight) || 0), 0);
+                sumTrips += fTrips.length; sumWeight += totalWt;
+                return { ...f, tripCount: fTrips.length, totalWeight: totalWt.toFixed(2) };
+            }).forEach(item => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td class="px-4 py-3">
+                            <div class="flex items-center gap-2 sm:gap-3">
+                                <i class="fas fa-user-tie text-slate-500 text-sm sm:text-base"></i>
+                                <div>
+                                    <span class="font-bold text-white block text-[11px] sm:text-xs">${item.name||'Unknown'}</span>
+                                    <span class="text-[9px] text-slate-400 truncate max-w-[100px] sm:max-w-[150px] block">${item.address||'-'}</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-4 py-3"><span class="font-mono text-slate-300 text-[10px] sm:text-xs">${item.phone||'-'}</span></td>
+                        <td class="px-4 py-3"><span class="font-bold text-teal-400 text-[10px] sm:text-xs">${item.groupSize || '0'}</span></td>
+                        <td class="px-4 py-3"><span class="font-bold text-blue-400 text-xs sm:text-sm">${item.tripCount}</span></td>
+                        <td class="px-4 py-3"><span class="font-black text-teal-400 text-sm sm:text-base">${item.totalWeight}</span></td>
+                        <td class="px-4 py-3 text-right whitespace-nowrap">
+                            <button onclick="window.editRecord('mukadam', '${item.id}')" class="text-slate-400 hover:text-blue-400 mx-1"><i class="fas fa-edit"></i></button>
+                            <button onclick="window.deleteRecord('mukadam', '${item.id}')" class="text-slate-400 hover:text-red-400 mx-1"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+             if(sumTrips > 0) tbody.innerHTML += `<tr class="bg-slate-800"><td colspan="3" class="px-4 py-3 text-right font-black text-white text-[11px] sm:text-xs">Total Filtered:</td><td class="px-4 py-3 font-black text-blue-400 text-xs sm:text-sm">${sumTrips}</td><td class="px-4 py-3 font-black text-teal-400 text-sm sm:text-base">${sumWeight.toFixed(2)}</td><td></td></tr>`;
+        };
+
+        const renderTrips = () => {
+            const tbody = document.getElementById('trip-table-body');
+            const recentTbody = document.getElementById('dashboard-recent-trips');
+            if(!tbody || !recentTbody) return;
+            
+            tbody.innerHTML = '';
+            recentTbody.innerHTML = '';
+            
+            const activeSeason = window.appState.activeSeason;
+            let seasonalTrips = (window.appState.trips||[]).filter(t => t.season === activeSeason);
+            
+            const t = new Date();
+            const todayStr = t.getFullYear() + '-' + String(t.getMonth() + 1).padStart(2, '0') + '-' + String(t.getDate()).padStart(2, '0');
+            
+            let dashTotalWt = 0, dashTodayTrips = 0, dashTodayWt = 0;
+            
+            seasonalTrips.forEach(item => {
+                const wt = Number(item.weight) || 0;
+                dashTotalWt += wt;
+                if (item.date === todayStr) {
+                    dashTodayTrips++;
+                    dashTodayWt += wt;
+                }
+            });
+            
+            const e1 = document.getElementById('stat-weight-main'); if(e1) e1.innerText = dashTotalWt.toFixed(2);
+            const e2 = document.getElementById('stat-today-trips'); if(e2) e2.innerText = dashTodayTrips;
+            const e3 = document.getElementById('stat-total-trips'); if(e3) e3.innerText = seasonalTrips.length;
+            const stw = document.getElementById('stat-today-weight'); if(stw) stw.innerText = dashTodayWt.toFixed(2);
+
+            const displayTrips = getFilteredTrips() || [];
+            const sortedDisplayTrips = displayTrips.sort((a,b) => (b.timestamp||0) - (a.timestamp||0));
+            const sortedDashTrips = [...seasonalTrips].sort((a,b) => (b.timestamp||0) - (a.timestamp||0));
+
+            let filterTripWt = 0;
+
+            sortedDisplayTrips.forEach((item, index) => {
+                const factory = (window.appState.factories||[]).find(f => f.id === item.factoryId)?.name || 'Unknown';
+                const farmerObj = (window.appState.farmers||[]).find(f => f.id === item.farmerId);
+                const farmer = farmerObj?.name || 'Unknown';
+                const tractorObj = (window.appState.tractors||[]).find(t => t.id === item.tractorId);
+                const tractor = tractorObj ? `${tractorObj.tractorNameType} \n ${tractorObj.number}` : 'Unknown';
+                
+                filterTripWt += Number(item.weight) || 0;
+
+                const tripIdLabel = `<span class="bg-slate-800 text-white px-2 py-1 rounded-md text-[9px] sm:text-[10px] font-mono font-black border border-slate-600 shadow-sm"><i class="fas fa-hashtag text-teal-400 mr-1"></i> ${item.tripId || 'TRP-OLD'}</span>`;
+                const manualSlipLabel = `<span class="block text-[8px] sm:text-[9px] font-bold text-slate-400 mt-1">Slip: <span class="text-white">${item.slipNo || 'Pending'}</span></span>`;
+
+                const fullRowHtml = `
+                    <tr>
+                        <td class="px-4 py-3">
+                            ${tripIdLabel}
+                            ${manualSlipLabel}
+                        </td>
+                        <td class="px-4 py-3">
+                            <span class="font-bold text-slate-300 text-[10px] sm:text-xs block">${item.date||'-'}</span>
+                            <span class="text-[9px] text-slate-500">${item.time || ''}</span>
+                        </td>
+                        <td class="px-4 py-3">
+                            <span class="font-bold text-white text-[10px] sm:text-xs block truncate max-w-[120px]">${factory}</span>
+                            <span class="text-[8px] sm:text-[9px] text-teal-400 uppercase tracking-wider">${item.factoryAccount || '-'}</span>
+                        </td>
+                        <td class="px-4 py-3 font-black text-white text-[10px] sm:text-xs">${farmer}</td>
+                        <td class="px-4 py-3 text-slate-400 font-mono font-bold text-[9px] sm:text-[10px] whitespace-pre-line">${tractor}</td>
+                        <td class="px-4 py-3 font-black text-sm sm:text-base text-amber-400">${item.weight||0}</td>
+                        <td class="px-4 py-3 text-right whitespace-nowrap">
+                            <button onclick="window.printSlip('${item.id}')" title="Print Slip" class="text-slate-400 hover:text-emerald-400 mx-1"><i class="fas fa-print"></i></button>
+                            <button onclick="window.editRecord('trip', '${item.id}')" title="Edit" class="text-slate-400 hover:text-blue-400 mx-1"><i class="fas fa-edit"></i></button>
+                            <button onclick="window.deleteRecord('trip', '${item.id}')" title="Delete" class="text-slate-400 hover:text-red-400 mx-1"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
+                tbody.innerHTML += fullRowHtml;
+            });
+            
+            const e4 = document.getElementById('trip-view-total-count'); if(e4) e4.innerText = sortedDisplayTrips.length;
+            const e5 = document.getElementById('trip-view-total-weight'); if(e5) e5.innerText = filterTripWt.toFixed(2);
+
+            // Dashboard Recent EXACT Match Card Layout
+            sortedDashTrips.slice(0, 10).forEach(item => {
+                const factory = (window.appState.factories||[]).find(f => f.id === item.factoryId)?.name || 'Unknown';
+                const farmerObj = (window.appState.farmers||[]).find(f => f.id === item.farmerId);
+                const farmer = farmerObj?.name || 'Unknown';
+                
+                let timeLabel = '';
+                if (item.time) {
+                    const hour = parseInt(item.time.split(':')[0]);
+                    if (hour >= 5 && hour < 12) timeLabel = 'Morning';
+                    else if (hour >= 12 && hour < 17) timeLabel = 'Afternoon';
+                    else if (hour >= 17 && hour < 21) timeLabel = 'Evening';
+                    else timeLabel = 'Night';
+                }
+
+                const dashboardCardHtml = `
+                    <div class="bg-slate-800 border border-slate-700 rounded-[1.25rem] p-4 sm:p-5 hover:border-teal-500/50 transition-all shadow-md">
+                        <!-- Top Section -->
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="flex items-center gap-3 sm:gap-4">
+                                <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-[#10b981] flex items-center justify-center text-white shadow-inner shrink-0">
+                                    <i class="fas fa-truck text-lg sm:text-xl"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-black text-white text-sm sm:text-base">${item.tripId || 'TRP-OLD'}</h4>
+                                    <p class="text-[9px] sm:text-[10px] text-slate-400 font-bold mt-0.5">Slip No: <span class="text-slate-300">${item.slipNo || 'Pending'}</span></p>
+                                </div>
+                            </div>
+                            <div class="text-right flex flex-col items-end">
+                                <p class="text-[10px] sm:text-xs font-bold text-slate-400 flex items-center gap-1.5">
+                                    <i class="far fa-clock"></i> ${item.date} : ${item.time || ''}
+                                </p>
+                                <p class="text-[8px] sm:text-[9px] font-bold text-slate-500 mt-1 uppercase tracking-wider">${timeLabel}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="w-full h-px bg-slate-700/50 mb-3 sm:mb-4"></div>
+                        
+                        <!-- Bottom Section -->
+                        <div class="flex justify-between items-end">
+                            <div class="space-y-1.5 sm:space-y-2">
+                                <p class="text-[11px] sm:text-xs font-bold text-slate-400 flex items-center gap-2">
+                                    <i class="far fa-user w-4 text-center text-slate-500"></i> Farmer: <span class="text-slate-200 ml-1">${farmer}</span>
+                                </p>
+                                <p class="text-[11px] sm:text-xs font-bold text-slate-400 flex items-center gap-2">
+                                    <i class="fas fa-industry w-4 text-center text-slate-500"></i> Factory: <span class="text-slate-200 ml-1">${factory}</span>
+                                </p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-[9px] sm:text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Account: <span class="text-teal-400 capitalize">${item.factoryAccount || '-'}</span></p>
+                                <p class="text-xs sm:text-sm font-black text-white flex items-baseline justify-end gap-1">
+                                    Weight: <span class="text-amber-400 text-2xl sm:text-3xl leading-none drop-shadow-sm ml-1">${item.weight || 0}</span> <span class="text-[10px] text-slate-500">T</span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                recentTbody.innerHTML += dashboardCardHtml; 
+            });
+
+            if(sortedDashTrips.length === 0) {
+                recentTbody.innerHTML = `
+                    <div class="text-center py-8 sm:py-10 bg-slate-800 border border-slate-700 rounded-[1.25rem]">
+                        <i class="fas fa-box-open text-3xl sm:text-4xl text-slate-600 mb-3 block"></i>
+                        <p class="text-slate-400 font-bold text-xs sm:text-sm">No recent trips found.</p>
+                    </div>
+                `;
+            }
+        };
+
+        const reRenderAll = () => {
+            try { renderSeasonDropdown(); } catch(e){ console.error("Error renderSeasonDropdown", e); }
+            try { renderProfile(); } catch(e){ console.error("Error renderProfile", e); }
+            try { renderSeasons(); } catch(e){ console.error("Error renderSeasons", e); }
+            try { renderFactories(); } catch(e){ console.error("Error renderFactories", e); }
+            try { renderFarmers(); } catch(e){ console.error("Error renderFarmers", e); }
+            try { renderTractors(); } catch(e){ console.error("Error renderTractors", e); }
+            try { renderDrivers(); } catch(e){ console.error("Error renderDrivers", e); }
+            try { renderMukadams(); } catch(e){ console.error("Error renderMukadams", e); }
+            try { renderTrips(); } catch(e){ console.error("Error renderTrips", e); }
+        };
+
+        let unsubscribes = [];
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                window.appState.user = user;
+                const ue = document.getElementById('user-email-display');
+                if(ue) ue.innerText = user.email || "Connected";
+                
+                const authOverlay = document.getElementById('auth-overlay');
+                if(authOverlay) {
+                    authOverlay.classList.add('opacity-0', 'pointer-events-none');
+                    setTimeout(() => authOverlay.classList.add('hidden'), 500);
+                }
+                
+                unsubscribes.forEach(unsub => unsub());
+                unsubscribes = [];
+
+                const collections = ['farmer', 'tractor', 'driver', 'mukadam', 'factory', 'trip', 'profile', 'season'];
+                collections.forEach(coll => {
+                    const colName = getColName(coll);
+                    const q = collection(db, `artifacts/${appId}/users/${user.uid}/${colName}`);
+                    const unsub = onSnapshot(q, (snapshot) => {
+                        if(coll === 'profile') {
+                            const pDoc = snapshot.docs.find(d => d.id === 'main');
+                            window.appState.profile = pDoc ? { id: pDoc.id, ...pDoc.data() } : {};
+                        } else {
+                            const data = [];
+                            snapshot.forEach((doc) => data.push({ id: doc.id, ...doc.data() }));
+                            window.appState[colName] = data;
+                        }
+                        reRenderAll();
+                    }, (error) => {
+                        console.error(`Sync Error [${coll}]:`, error);
+                    });
+                    unsubscribes.push(unsub);
+                });
+                toggleLoading(false);
+            } else {
+                window.appState.user = null;
+                const authOverlay = document.getElementById('auth-overlay');
+                if(authOverlay) {
+                    authOverlay.classList.remove('hidden');
+                    setTimeout(() => authOverlay.classList.remove('opacity-0', 'pointer-events-none'), 10);
+                }
+                toggleLoading(false);
+            }
+        });
+
+        const initApp = async () => {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                }
+            } catch (error) { toggleLoading(false); }
+        };
+
+        initApp();
+
+    </script>
+</body>
+</html>
